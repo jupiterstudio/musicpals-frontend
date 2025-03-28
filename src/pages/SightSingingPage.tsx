@@ -1,5 +1,5 @@
 // src/pages/SightSingingPage.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Square, Play, ChevronRight, Music, List, Award } from 'lucide-react';
 import { Synth, start } from 'tone';
@@ -73,6 +73,13 @@ const exercises = [
     notes: ['C4', 'E4', 'G4', 'C5', 'G4', 'E4', 'C4'],
     durations: ['q', 'q', 'q', 'h', 'q', 'q', 'h'],
     difficulty: 'Easy',
+    exerciseType: 'Intervals',
+  },
+  {
+    name: 'Medium Intervals',
+    notes: ['C4', 'E4', 'G4', 'E4', 'A4', 'F4', 'D4'],
+    durations: ['q', 'q', 'q', 'q', 'q', 'q', 'h'],
+    difficulty: 'Medium',
     exerciseType: 'Intervals',
   },
   {
@@ -235,134 +242,84 @@ const SightSingingPage = () => {
   );
 
   // Create a helper function to calculate pagination info
-  const calculatePagination = (exercise: any) => {
-    if (!exercise) return { totalPages: 1, notesPerPage: 4 };
+  const calculatePagination = useCallback(
+    (exercise: any) => {
+      if (!exercise) return { totalPages: 1, notesPerPage: 4 };
 
-    const notesPerPage = 4; // Show 4 notes per page/measure
-    const totalPages = Math.ceil(exercise.notes.length / notesPerPage);
-    const pageOfCurrentNote = Math.floor(currentNoteIndex / notesPerPage);
+      const beatsPerPage = 4; // Target 4 beats per page (standard 4/4 measure)
+      const notes = exercise.notes;
+      const durations = exercise.durations;
 
-    return {
-      notesPerPage,
-      totalPages,
-      pageOfCurrentNote,
-      startIndex: currentPage * notesPerPage,
-      endIndex: Math.min(exercise.notes.length, (currentPage + 1) * notesPerPage),
-    };
-  };
+      // Calculate where to break pages based on accumulated beats
+      let currentBeats = 0;
+      const pageBreakIndices: any[] = [];
 
-  const renderNotation = () => {
-    if (!notationRef.current) return;
-
-    try {
-      // Clear previous notation
-      notationRef.current.innerHTML = '';
-
-      // Get current exercise
-      const exercise = filteredExercises[currentExercise];
-      if (!exercise) {
-        console.error('No exercise found for index:', currentExercise);
-        return;
-      }
-
-      // Get pagination info
-      const { notesPerPage, startIndex, endIndex } = calculatePagination(exercise);
-
-      // Get notes and durations for current page
-      const displayNotes = exercise.notes.slice(startIndex, endIndex);
-      const displayDurations = exercise.durations.slice(startIndex, endIndex);
-
-      // Create renderer
-      const renderer = new Vex.Renderer(notationRef.current, Vex.Renderer.Backends.SVG);
-      renderer.resize(600, 120);
-      const context = renderer.getContext();
-
-      // Create stave
-      const stave = new Vex.Stave(10, 0, 500);
-      stave.addClef('treble');
-      stave.setContext(context).draw();
-
-      // Create notes with annotations
-      const notes = displayNotes.map((note, index) => {
-        const absoluteIndex = (startIndex ?? 0) + index;
-        const vfNote = new Vex.StaveNote({
-          keys: [noteToVexflow(note)],
-          duration: displayDurations[index],
-        });
-
-        // In note-by-note mode, highlight the current note
-        // In full-melody mode, don't highlight any specific note during recording
-        if (practiceMode === 'note-by-note' && absoluteIndex === currentNoteIndex) {
-          vfNote.setStyle({ fillStyle: 'blue', strokeStyle: 'blue' });
+      durations.forEach((duration: string, index: any) => {
+        let beatValue = 1; // Default quarter note
+        switch (duration) {
+          case 'w':
+            beatValue = 4;
+            break; // Whole note
+          case 'h':
+            beatValue = 2;
+            break; // Half note
+          case 'q':
+            beatValue = 1;
+            break; // Quarter note
+          case 'e':
+            beatValue = 0.5;
+            break; // Eighth note
+          default:
+            beatValue = 1;
+            break;
         }
 
-        // If we're showing melody results, highlight correct/incorrect notes
-        if (showMelodyResults && practiceMode === 'full-melody') {
-          const result = melodyResults.find((r, i) => i === absoluteIndex);
-          if (result) {
-            vfNote.setStyle({
-              fillStyle: result.isCorrect ? 'green' : 'red',
-              strokeStyle: result.isCorrect ? 'green' : 'red',
-            });
-          }
+        // If adding this note would exceed the beats per page, add a page break
+        if (currentBeats + beatValue > beatsPerPage && index > 0) {
+          pageBreakIndices.push(index);
+          currentBeats = beatValue; // Reset with current note
+        } else {
+          currentBeats += beatValue;
         }
-
-        // Add note name annotation below the note
-        const annotation = new Vex.Annotation(note);
-        annotation.setText(note);
-        annotation.setVerticalJustification(Vex.Annotation.VerticalJustify.BOTTOM);
-
-        // Set font properties safely
-        try {
-          let fontWeight = 'normal';
-          let fontColor = '#666';
-
-          if (practiceMode === 'note-by-note' && absoluteIndex === currentNoteIndex) {
-            fontWeight = 'bold';
-            fontColor = '#4f46e5';
-          } else if (showMelodyResults && practiceMode === 'full-melody') {
-            const result = melodyResults.find((r, i) => i === absoluteIndex);
-            if (result) {
-              fontWeight = 'bold';
-              fontColor = result.isCorrect ? 'green' : 'red';
-            }
-          }
-
-          annotation.setFont('Arial', 10, fontWeight);
-          if (typeof annotation.setStyle === 'function') {
-            annotation.setStyle({ fillStyle: fontColor });
-          }
-        } catch (e) {
-          console.warn('Annotation styling not fully supported', e);
-        }
-
-        vfNote.addModifier(annotation);
-        return vfNote;
       });
 
-      // Create voice with exactly 4 beats to match a 4/4 measure
-      const voice = new Vex.Voice({ numBeats: 4, beatValue: 4 });
-      voice.addTickables(notes);
+      // Add final page break if needed
+      if (
+        pageBreakIndices.length === 0 ||
+        pageBreakIndices[pageBreakIndices.length - 1] !== notes.length
+      ) {
+        pageBreakIndices.push(notes.length);
+      }
 
-      // Format and draw
-      new Vex.Formatter().joinVoices([voice]).format([voice], 400);
-      voice.draw(context, stave);
+      // Find which page contains the current note
+      let pageOfCurrentNote = 0;
+      for (let i = 0; i < pageBreakIndices.length; i++) {
+        if (currentNoteIndex < pageBreakIndices[i]) {
+          pageOfCurrentNote = i;
+          break;
+        }
+      }
 
-      console.log('Successfully rendered notation');
-    } catch (error) {
-      console.error('Error rendering notation:', error);
-      // Fallback to simple representation if VexFlow fails
-      renderSimpleNotation();
-    }
-  };
+      // Calculate start and end indices for the current page
+      const startIndex = currentPage === 0 ? 0 : pageBreakIndices[currentPage - 1];
+      const endIndex = pageBreakIndices[currentPage] || notes.length;
+
+      return {
+        totalPages: pageBreakIndices.length,
+        pageOfCurrentNote,
+        startIndex,
+        endIndex,
+      };
+    },
+    [currentNoteIndex, currentPage]
+  );
 
   // Update the renderSimpleNotation function
-  const renderSimpleNotation = () => {
+  const renderSimpleNotation = useCallback(() => {
     if (!notationRef.current) return;
 
     // Clear the notation area
     notationRef.current.innerHTML = '';
-
     // Get the current exercise
     const exercise = filteredExercises[currentExercise];
     if (!exercise) return;
@@ -506,7 +463,118 @@ const SightSingingPage = () => {
 
     notationRef.current.appendChild(container);
     console.log('Rendered simple notation fallback');
-  };
+  }, [
+    calculatePagination,
+    currentExercise,
+    currentNoteIndex,
+    filteredExercises,
+    melodyResults,
+    practiceMode,
+    showMelodyResults,
+  ]);
+
+  const renderNotation = useCallback(() => {
+    if (!notationRef.current) {
+      console.error('Notation ref is not available');
+      return;
+    }
+
+    try {
+      // Clear previous notation
+      notationRef.current.innerHTML = '';
+
+      // Check if we have exercises to render
+      if (filteredExercises.length === 0) {
+        console.warn('No exercises available to render');
+        notationRef.current.innerHTML =
+          '<div class="p-4 text-gray-500">No exercises available</div>';
+        return;
+      }
+
+      // Get current exercise with additional safety check
+      const exercise = filteredExercises[currentExercise];
+      if (!exercise) {
+        console.error('No exercise found for index:', currentExercise);
+        notationRef.current.innerHTML = '<div class="p-4 text-gray-500">Exercise not found</div>';
+        return;
+      }
+
+      // Get pagination info
+      const { startIndex, endIndex } = calculatePagination(exercise);
+
+      // Get notes and durations for current page
+      const displayNotes = exercise.notes.slice(startIndex, endIndex);
+      const displayDurations = exercise.durations.slice(startIndex, endIndex);
+
+      // Create renderer
+      const renderer = new Vex.Renderer(notationRef.current, Vex.Renderer.Backends.SVG);
+      renderer.resize(600, 120);
+      const context = renderer.getContext();
+
+      // Create stave
+      const stave = new Vex.Stave(10, 0, 500);
+      stave.addClef('treble');
+      stave.setContext(context).draw();
+
+      try {
+        // Create notes with annotations
+        const notes = displayNotes.map((note, index) => {
+          const absoluteIndex = (startIndex ?? 0) + index;
+          const vfNote = new Vex.StaveNote({
+            keys: [noteToVexflow(note)],
+            duration: displayDurations[index],
+          });
+
+          // In note-by-note mode, highlight the current note
+          if (practiceMode === 'note-by-note' && absoluteIndex === currentNoteIndex) {
+            vfNote.setStyle({ fillStyle: 'blue', strokeStyle: 'blue' });
+          }
+
+          // Add note name annotation below the note
+          const annotation = new Vex.Annotation(note);
+          annotation.setText(note);
+          annotation.setVerticalJustification(Vex.Annotation.VerticalJustify.BOTTOM);
+
+          vfNote.addModifier(annotation);
+          return vfNote;
+        });
+
+        // Fix for "Too many ticks" error - use a more flexible voice setup
+        // Creating a voice without strict time constraints
+        const voice = new Vex.Voice({
+          numBeats: 4,
+          beatValue: 4,
+        });
+
+        // Use setStrict(false) instead of setMode(SOFT) for newer VexFlow versions
+        voice.setStrict(false);
+
+        // Add the notes to the voice
+        voice.addTickables(notes);
+
+        // Format and draw
+        new Vex.Formatter().joinVoices([voice]).format([voice], 400);
+
+        voice.draw(context, stave);
+
+        console.log('Successfully rendered notation');
+      } catch (err) {
+        console.error('Error creating notes or voice:', err);
+        throw err; // Re-throw to trigger fallback
+      }
+    } catch (error) {
+      console.error('Error rendering notation:', error);
+      // Fallback to simple representation if VexFlow fails
+      renderSimpleNotation();
+    }
+  }, [
+    calculatePagination,
+    currentExercise,
+    currentNoteIndex,
+    filteredExercises,
+    practiceMode,
+    renderSimpleNotation,
+  ]);
 
   // Add this function to handle moving to the next page
   const handleNextPage = () => {
@@ -591,10 +659,19 @@ const SightSingingPage = () => {
   // Update dependencies for the notation rendering useEffect
   useEffect(() => {
     console.log('Attempting to render notation');
-    // Small delay to ensure DOM is ready
+
+    // Increase the delay to give DOM more time to fully initialize
     const timer = setTimeout(() => {
-      renderNotation();
-    }, 100);
+      if (notationRef.current) {
+        // Force a clear of any previous content
+        notationRef.current.innerHTML = '';
+
+        // Small additional delay to ensure DOM is really ready
+        setTimeout(() => {
+          renderNotation();
+        }, 50);
+      }
+    }, 300); // Increased from 100ms to 300ms
 
     return () => clearTimeout(timer);
   }, [
@@ -605,7 +682,18 @@ const SightSingingPage = () => {
     practiceMode,
     showMelodyResults,
     melodyResults,
+    renderNotation,
   ]);
+
+  useEffect(() => {
+    // Force a re-render after component mount
+    const initialRenderTimer = setTimeout(() => {
+      // This small state update will trigger a re-render
+      setCurrentPage(0);
+    }, 500);
+
+    return () => clearTimeout(initialRenderTimer);
+  }, []); // Empty dependency array means this runs once on mount
 
   // Play the reference note (note-by-note mode) or full melody (full-melody mode)
   const playReferenceNote = async () => {
