@@ -1,7 +1,17 @@
 // src/pages/MusicGenerationPage.tsx
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Play, Pause, Music, ZoomIn, ZoomOut, ChevronUp, ChevronDown, Save } from 'lucide-react';
+import {
+  Play,
+  Pause,
+  Music,
+  ZoomIn,
+  ZoomOut,
+  ChevronUp,
+  ChevronDown,
+  Save,
+  Award,
+} from 'lucide-react';
 import Layout from '../components/Layout';
 import { exerciseAPI, progressAPI, achievementAPI } from '../services/api';
 
