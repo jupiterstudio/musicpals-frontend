@@ -1,0 +1,104 @@
+@import "tailwindcss";
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.piano-key {
+  transition: all 0.1s ease;
+}
+
+.piano-key:hover {
+  background-color: #f3f4f6;
+}
+
+.note-active {
+  fill: #ef4444 !important;
+  stroke: #b91c1c !important;
+  stroke-width: 2px;
+}
+
+.playback-line {
+  stroke: #ef4444;
+  stroke-width: 2px;
+}
+
+/* 1. Main App Background with Musical Elements 
+   This subtle pattern works well for the entire application background */
+.music-app-background {
+  background-color: #F8F7F1;
+  background-image: url('./assets/music-bg-pattern-main.svg');
+  background-repeat: repeat;
+  background-size: 500px;
+}
+
+/* 2. Musical Header Background
+   Perfect for page headers or hero sections */
+.music-header-background {
+  background-image: url('./assets/music-bg-header.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white; /* Text color for contrast */
+  padding: 50px 20px;
+}
+
+/* 3. Card Background with Musical Symbols
+   Great for content cards, feature boxes, etc. */
+.music-card-background {
+  background-color: white;
+  background-image: url('./assets/music-card-bg.svg');
+  background-repeat: repeat;
+  background-size: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+}
+
+/* 4. Sound Wave Background 
+   Good for audio-related sections or features */
+.sound-wave-background {
+  background-image: url('./assets/sound-wave-bg.svg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 30px;
+}

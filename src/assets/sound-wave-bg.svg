@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3730A3" stop-opacity="0.05" />
+      <stop offset="50%" stop-color="#8B0000" stop-opacity="0.05" />
+      <stop offset="100%" stop-color="#D4AF37" stop-opacity="0.05" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="1200" height="300" fill="#F8F7F1" />
+  
+  <!-- Sound Wave Pattern -->
+  <g>
+    <!-- Primary Wave -->
+    <path d="M0,150 
+             C50,120 100,80 150,130 
+             C200,180 250,220 300,170 
+             C350,120 400,80 450,130 
+             C500,180 550,220 600,170 
+             C650,120 700,80 750,130 
+             C800,180 850,220 900,170 
+             C950,120 1000,80 1050,130 
+             C1100,180 1150,220 1200,170" 
+          stroke="url(#waveGradient)" stroke-width="3" fill="none" />
+    
+    <!-- Secondary Wave (offset) -->
+    <path d="M0,180 
+             C50,150 100,110 150,160 
+             C200,210 250,250 300,200 
+             C350,150 400,110 450,160 
+             C500,210 550,250 600,200 
+             C650,150 700,110 750,160 
+             C800,210 850,250 900,200 
+             C950,150 1000,110 1050,160 
+             C1100,210 1150,250 1200,200" 
+          stroke="#3730A3" stroke-width="2" fill="none" opacity="0.03" />
+    
+    <!-- Tertiary Wave (smaller) -->
+    <path d="M0,140 
+             C30,130 60,120 90,140 
+             C120,160 150,170 180,150 
+             C210,130 240,120 270,140 
+             C300,160 330,170 360,150 
+             C390,130 420,120 450,140 
+             C480,160 510,170 540,150 
+             C570,130 600,120 630,140 
+             C660,160 690,170 720,150 
+             C750,130 780,120 810,140 
+             C840,160 870,170 900,150 
+             C930,130 960,120 990,140 
+             C1020,160 1050,170 1080,150 
+             C1110,130 1140,120 1170,140 
+             C1200,160 1230,170 1260,150" 
+          stroke="#8B0000" stroke-width="1" fill="none" opacity="0.03" />
+    
+    <!-- Fourth Wave (smallest) -->
+    <path d="M0,160 
+             C20,155 40,150 60,155 
+             C80,160 100,165 120,160 
+             C140,155 160,150 180,155 
+             C200,160 220,165 240,160 
+             C260,155 280,150 300,155 
+             C320,160 340,165 360,160 
+             C380,155 400,150 420,155 
+             C440,160 460,165 480,160 
+             C500,155 520,150 540,155 
+             C560,160 580,165 600,160 
+             C620,155 640,150 660,155 
+             C680,160 700,165 720,160 
+             C740,155 760,150 780,155 
+             C800,160 820,165 840,160 
+             C860,155 880,150 900,155 
+             C920,160 940,165 960,160 
+             C980,155 1000,150 1020,155 
+             C1040,160 1060,165 1080,160 
+             C1100,155 1120,150 1140,155 
+             C1160,160 1180,165 1200,160" 
+          stroke="#D4AF37" stroke-width="1" fill="none" opacity="0.03" />
+  </g>
+  
+  <!-- Musical Elements -->
+  <g opacity="0.03">
+    <!-- Scattered Notes -->
+    <!-- Quarter Note 1 -->
+    <g transform="translate(100, 80)">
+      <ellipse cx="0" cy="0" rx="8" ry="5" transform="rotate(-20)" fill="#3730A3" />
+      <line x1="8" y1="0" x2="8" y2="-25" stroke="#3730A3" stroke-width="1.5" />
+    </g>
+    
+    <!-- Eighth Note -->
+    <g transform="translate(300, 220)">
+      <ellipse cx="0" cy="0" rx="8" ry="5" transform="rotate(-20)" fill="#8B0000" />
+      <line x1="8" y1="0" x2="8" y2="-25" stroke="#8B0000" stroke-width="1.5" />
+      <path d="M8,-25 Q13,-20 18,-15" stroke="#8B0000" stroke-width="1.5" fill="none" />
+    </g>
+    
+    <!-- Half Note -->
+    <g transform="translate(600, 100)">
+      <ellipse cx="0" cy="0" rx="8" ry="5" transform="rotate(-20)" stroke="#3730A3" fill="none" stroke-width="1.5" />
+      <line x1="8" y1="0" x2="8" y2="-25" stroke="#3730A3" stroke-width="1.5" />
+    </g>
+    
+    <!-- Quarter Note 2 -->
+    <g transform="translate(800, 180)">
+      <ellipse cx="0" cy="0" rx="8" ry="5" transform="rotate(-20)" fill="#D4AF37" />
+      <line x1="8" y1="0" x2="8" y2="-25" stroke="#D4AF37" stroke-width="1.5" />
+    </g>
+    
+    <!-- Sixteenth Note -->
+    <g transform="translate(1000, 70)">
+      <ellipse cx="0" cy="0" rx="8" ry="5" transform="rotate(-20)" fill="#8B0000" />
+      <line x1="8" y1="0" x2="8" y2="-25" stroke="#8B0000" stroke-width="1.5" />
+      <path d="M8,-25 Q13,-20 18,-15" stroke="#8B0000" stroke-width="1.5" fill="none" />
+      <path d="M8,-15 Q13,-10 18,-5" stroke="#8B0000" stroke-width="1.5" fill="none" />
+    </g>
+  </g>
+</svg>
