@@ -672,12 +672,14 @@ const EarTrainingPage = () => {
 
           <motion.button
             className={`bg-indigo-600 text-white py-2 px-6 rounded-lg flex items-center font-medium ${
-              !selectedOption || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+              (!selectedOption && !feedback?.startsWith('Correct')) || isSubmitting
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
             }`}
             whileHover={{ backgroundColor: '#4338ca' }}
             whileTap={{ scale: 0.98 }}
             onClick={handleNextChallenge}
-            disabled={!selectedOption || isSubmitting}
+            disabled={(!selectedOption && !feedback?.startsWith('Correct')) || isSubmitting}
           >
             {isSubmitting ? (
               <>
