@@ -79,55 +79,107 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white flex items-center justify-center px-4 text-start">
+    <div className="min-h-screen flex items-center justify-center px-4 text-start">
+      {/* Floating musical notes background */}
+      <div className="floating-notes">
+        <div className="note">🎵</div>
+        <div className="note">🎶</div>
+        <div className="note">🎼</div>
+        <div className="note">🎹</div>
+        <div className="note">🎺</div>
+        <div className="note">🎸</div>
+        <div className="note">🥁</div>
+        <div className="note">🎤</div>
+      </div>
+
       <motion.div
-        className="max-w-md w-full"
+        className="max-w-md w-full relative z-10"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <motion.div className="text-center mb-8" variants={itemVariants}>
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full text-white mb-4">
-            <img src={Logo} alt="Music Pals" className="h-15 w-auto" />
+        <motion.div className="text-center mb-8 mt-4" variants={itemVariants}>
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bouncing-logo">
+            <span className="text-6xl">🎵</span>
           </div>
 
-          <h2 className="text-3xl font-bold text-gray-800">Music Pals</h2>
-          <p className="text-gray-600 mt-2">
-            {isLogin
-              ? 'Sign in to continue your musical journey'
-              : 'Create an account to get started'}
+          <h2
+            className="text-4xl mb-4 text-white"
+            style={{
+              fontFamily: 'Fredoka One, cursive',
+              fontWeight: '400',
+            }}
+          >
+            Music Pals
+          </h2>
+          <p
+            className="text-xl text-white font-semibold"
+            style={{
+              fontFamily: 'Nunito, sans-serif',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
+            }}
+          >
+            {isLogin ? 'Welcome back, Musical Star! 🌟' : 'Join our Musical Adventure! 🎪'}
           </p>
         </motion.div>
 
-        <motion.div className="bg-white rounded-xl shadow-lg p-8" variants={itemVariants}>
-          <h3 className="text-xl font-semibold text-gray-800 mb-6">
-            {isLogin ? 'Sign In' : 'Create Account'}
+        <motion.div className="kid-welcome-section" variants={itemVariants}>
+          <h3
+            className="text-2xl mb-6"
+            style={{
+              position: 'relative',
+              zIndex: 2,
+              fontFamily: 'Fredoka One, cursive',
+              color: '#FF6B9D',
+              textShadow: '3px 3px 0px #FFE66D',
+            }}
+          >
+            {isLogin ? "Let's Play Music! 🎵" : 'Become a Music Pal! 🎪'}
           </h3>
 
-          {error && <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">{error}</div>}
-
-          {registrationSuccess && (
-            <div className="bg-green-50 text-green-600 p-4 rounded-md mb-6">
-              Registration successful! Your email has been pre-filled. Please enter your password to
-              sign in.
+          {error && (
+            <div
+              className="bg-red-50 text-red-600 p-4 rounded-2xl mb-6 border-2 border-red-200"
+              style={{ position: 'relative', zIndex: 2 }}
+            >
+              <span className="text-2xl mr-2">😞</span>
+              {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit}>
+          {registrationSuccess && (
+            <div
+              className="bg-green-50 text-green-600 p-4 rounded-2xl mb-6 border-2 border-green-200"
+              style={{ position: 'relative', zIndex: 2 }}
+            >
+              <span className="text-2xl mr-2">🎉</span>
+              Welcome to Music Pals! Your email is ready. Just enter your password to start playing!
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} style={{ position: 'relative', zIndex: 2 }}>
             {!isLogin && (
-              <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="username">
-                  Username
+              <div className="mb-6">
+                <label
+                  className="block text-base font-bold mb-3"
+                  htmlFor="username"
+                  style={{
+                    fontFamily: 'Nunito, sans-serif',
+                    color: '#666',
+                  }}
+                >
+                  🎭 What should we call you?
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User size={18} className="text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <span className="text-xl">👤</span>
                   </div>
                   <input
                     id="username"
                     type="text"
-                    className="pl-10 w-full py-2 px-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    placeholder="Your username"
+                    className="pl-12 w-full py-4 px-6 border-4 border-pink-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-400 text-lg font-semibold bg-white"
+                    style={{ fontFamily: 'Nunito, sans-serif' }}
+                    placeholder="Your awesome name!"
                     value={username}
                     onChange={e => setUsername(e.target.value)}
                     required
@@ -136,19 +188,27 @@ const LoginPage = () => {
               </div>
             )}
 
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="email">
-                Email
+            <div className="mb-6">
+              <label
+                className="block text-base font-bold mb-3"
+                htmlFor="email"
+                style={{
+                  fontFamily: 'Nunito, sans-serif',
+                  color: '#666',
+                }}
+              >
+                📧 Your magical email address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <AtSign size={18} className="text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-xl">✉️</span>
                 </div>
                 <input
                   id="email"
                   type="email"
-                  className="pl-10 w-full py-2 px-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Your email"
+                  className="pl-12 w-full py-4 px-6 border-4 border-pink-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-400 text-lg font-semibold bg-white"
+                  style={{ fontFamily: 'Nunito, sans-serif' }}
+                  placeholder="your.email@example.com"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
@@ -156,19 +216,27 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="password">
-                Password
+            <div className="mb-8">
+              <label
+                className="block text-base font-bold mb-3"
+                htmlFor="password"
+                style={{
+                  fontFamily: 'Nunito, sans-serif',
+                  color: '#666',
+                }}
+              >
+                🔐 Your secret musical password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-gray-400" />
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <span className="text-xl">🔑</span>
                 </div>
                 <input
                   id="password"
                   type="password"
-                  className="pl-10 w-full py-2 px-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  placeholder="Your password"
+                  className="pl-12 w-full py-4 px-6 border-4 border-pink-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-pink-300 focus:border-pink-400 text-lg font-semibold bg-white"
+                  style={{ fontFamily: 'Nunito, sans-serif' }}
+                  placeholder="Super secret password!"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
@@ -176,34 +244,49 @@ const LoginPage = () => {
               </div>
             </div>
 
-            <button
+            <motion.button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md flex items-center justify-center transition duration-300"
+              className="kid-button w-full text-xl py-4 px-6 flex items-center justify-center"
               disabled={loading}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               {loading ? (
-                <div className="w-6 h-6 border-t-2 border-r-2 border-white rounded-full animate-spin mr-2"></div>
+                <div className="w-6 h-6 border-t-2 border-r-2 border-white rounded-full animate-spin mr-3"></div>
               ) : isLogin ? (
-                <LogIn size={18} className="mr-2" />
+                <span className="text-2xl mr-3">🎵</span>
               ) : (
-                <UserPlus size={18} className="mr-2" />
+                <span className="text-2xl mr-3">🎪</span>
               )}
-              {isLogin ? 'Sign In' : 'Create Account'}
-            </button>
+              {isLogin ? "Let's Play Music! 🚀" : 'Join the Fun! 🌟'}
+            </motion.button>
           </form>
 
-          <div className="mt-6 text-center">
-            <button
+          <div className="mt-8 text-center" style={{ position: 'relative', zIndex: 2 }}>
+            <motion.button
               onClick={toggleForm}
-              className="text-indigo-600 hover:text-indigo-800 text-sm font-medium focus:outline-none"
+              className="text-lg font-bold text-pink-500 hover:text-pink-600 focus:outline-none"
+              style={{ fontFamily: 'Nunito, sans-serif' }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-            </button>
+              {isLogin
+                ? '🎪 New here? Join our Musical Adventure!'
+                : "🎵 Already a Music Pal? Let's Play!"}
+            </motion.button>
           </div>
         </motion.div>
 
-        <motion.div className="text-center mt-8 text-sm text-gray-500" variants={itemVariants}>
-          <p>© 2025 Music Pals. All rights reserved.</p>
+        <motion.div className="text-center mt-8" variants={itemVariants}>
+          <p
+            className="text-lg font-semibold"
+            style={{
+              fontFamily: 'Nunito, sans-serif',
+              color: '#666',
+            }}
+          >
+            © 2025 Music Pals. Making music magical! 🎵✨
+          </p>
         </motion.div>
       </motion.div>
     </div>

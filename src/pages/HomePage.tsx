@@ -101,231 +101,212 @@ const HomePage = () => {
   }, []);
 
   return (
-    <Layout backgroundClass="sound-wave-background">
+    <Layout backgroundClass="">
+      {/* Floating musical notes background */}
+      <div className="floating-notes">
+        <div className="note">🎵</div>
+        <div className="note">🎶</div>
+        <div className="note">🎼</div>
+        <div className="note">🎹</div>
+        <div className="note">🎺</div>
+        <div className="note">🎸</div>
+        <div className="note">🥁</div>
+        <div className="note">🎤</div>
+      </div>
+
       <motion.div
-        className="container mx-auto py-8 px-6"
+        className="py-8 px-4"
+        style={{
+          maxWidth: '1000px',
+          margin: '0 auto',
+          position: 'relative',
+          zIndex: 10
+        }}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Welcome Section */}
         <motion.section
-          className="bg-white rounded-lg shadow-sm p-8 flex justify-between items-center"
+          className="kid-welcome-section"
           variants={itemVariants}
         >
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800">Welcome to Music Pals!</h2>
-            <p className="text-gray-600 mt-2 text-lg">
-              Your interactive companion for learning and enjoying music.
-            </p>
-            <p className="text-gray-600 mt-1">
-              Choose from our learning modules below to start your musical journey.
-            </p>
-          </div>
-          <motion.div
-            className="text-indigo-600"
-            animate={{
-              rotate: [0, 10, 0, -10, 0],
-            }}
-            transition={{
-              repeat: Infinity,
-              duration: 5,
-              ease: 'easeInOut',
-            }}
-          >
-            <Music size={64} />
-          </motion.div>
+          <h1 className="kid-title text-4xl md:text-5xl mb-4" style={{ position: 'relative', zIndex: 2 }}>
+            Welcome to Your Musical Adventure!
+          </h1>
+          <div className="musical-icon">🎪</div>
+          <p className="kid-subtitle text-xl" style={{ position: 'relative', zIndex: 2 }}>
+            Ready to explore the magical world of music? Let's make some beautiful sounds together!
+          </p>
         </motion.section>
 
-        {/* Feature Cards */}
-        <section className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Activity Cards */}
+        <section className="kid-activities-grid">
           {/* Ear Training Card */}
           <motion.div
-            className="bg-white rounded-lg shadow-sm overflow-hidden"
-            whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(79, 70, 229, 0.1)' }}
+            className="kid-card ear-training"
+            whileHover={{ y: -10, scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             variants={itemVariants}
+            onClick={() => navigate('/ear-training')}
           >
-            <div className="h-32 bg-indigo-50 flex items-center justify-center">
-              <Ear size={48} className="text-indigo-600" />
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold text-indigo-600">Ear Training</h3>
-              <p className="mt-2 text-gray-600 text-sm">
-                Develop your ability to recognize notes, chords, and melodies by ear.
-              </p>
-              <p className="mt-1 text-gray-600 text-sm">
-                Choose from different difficulty levels and improve your musical hearing.
-              </p>
-              <motion.button
-                className="mt-4 bg-indigo-600 text-white py-2 px-4 rounded-full flex items-center text-sm font-medium"
-                whileHover={{ backgroundColor: '#4338ca' }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/ear-training')}
-              >
-                Start Training
-                <ChevronRight size={16} className="ml-1" />
-              </motion.button>
-            </div>
+            <span className="activity-icon">👂🎵</span>
+            <h3 className="activity-title">Ear Training Fun!</h3>
+            <p className="activity-description">
+              Can you guess the mystery sounds? Train your super hearing powers and become a music detective!
+            </p>
+            <motion.button
+              className="kid-button"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Start Listening! 🕵️
+            </motion.button>
           </motion.div>
 
           {/* Sight Singing Card */}
           <motion.div
-            className="bg-white rounded-lg shadow-sm overflow-hidden"
-            whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(217, 119, 6, 0.1)' }}
+            className="kid-card sight-singing"
+            whileHover={{ y: -10, scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             variants={itemVariants}
+            onClick={() => navigate('/sight-singing')}
           >
-            <div className="h-32 bg-amber-50 flex items-center justify-center">
-              <Mic size={48} className="text-amber-600" />
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold text-amber-600">Sight Singing</h3>
-              <p className="mt-2 text-gray-600 text-sm">
-                Practice singing musical notation with real-time feedback on your accuracy.
-              </p>
-              <p className="mt-1 text-gray-600 text-sm">
-                Record your voice and see how well you can match the notes.
-              </p>
-              <motion.button
-                className="mt-4 bg-amber-600 text-white py-2 px-4 rounded-full flex items-center text-sm font-medium"
-                whileHover={{ backgroundColor: '#b45309' }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/sight-singing')}
-              >
-                Start Singing
-                <ChevronRight size={16} className="ml-1" />
-              </motion.button>
-            </div>
+            <span className="activity-icon">🎤✨</span>
+            <h3 className="activity-title">Singing Star!</h3>
+            <p className="activity-description">
+              Sing along with the notes and watch them light up! Become the next big singing sensation!
+            </p>
+            <motion.button
+              className="kid-button"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Let's Sing! 🌟
+            </motion.button>
           </motion.div>
 
           {/* Music Generation Card */}
           <motion.div
-            className="bg-white rounded-lg shadow-sm overflow-hidden"
-            whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(37, 99, 235, 0.1)' }}
+            className="kid-card music-generation"
+            whileHover={{ y: -10, scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             variants={itemVariants}
+            onClick={() => navigate('/music-generation')}
           >
-            <div className="h-32 bg-blue-50 flex items-center justify-center">
-              <Music size={48} className="text-blue-600" />
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold text-blue-600">Music Generation</h3>
-              <p className="mt-2 text-gray-600 text-sm">
-                Create your own melodies or explore popular tunes through our interactive piano
-                roll.
-              </p>
-              <p className="mt-1 text-gray-600 text-sm">
-                Play, pause, and visualize music in real-time.
-              </p>
-              <motion.button
-                className="mt-4 bg-blue-600 text-white py-2 px-4 rounded-full flex items-center text-sm font-medium"
-                whileHover={{ backgroundColor: '#1d4ed8' }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/music-generation')}
-              >
-                Start Creating
-                <ChevronRight size={16} className="ml-1" />
-              </motion.button>
-            </div>
+            <span className="activity-icon">🎹🎨</span>
+            <h3 className="activity-title">Music Creator!</h3>
+            <p className="activity-description">
+              Paint with sounds! Create your own magical melodies and share them with friends!
+            </p>
+            <motion.button
+              className="kid-button"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Create Music! 🎨
+            </motion.button>
           </motion.div>
 
           {/* Lessons Card */}
           <motion.div
-            className="bg-white rounded-lg shadow-sm overflow-hidden"
-            whileHover={{ y: -5, boxShadow: '0 10px 25px -5px rgba(22, 163, 74, 0.1)' }}
+            className="kid-card lessons"
+            whileHover={{ y: -10, scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             variants={itemVariants}
+            onClick={() => navigate('/lessons')}
           >
-            <div className="h-32 bg-green-50 flex items-center justify-center">
-              <BookOpen size={48} className="text-green-600" />
-            </div>
-            <div className="p-6">
-              <h3 className="text-xl font-semibold text-green-600">Lessons</h3>
-              <p className="mt-2 text-gray-600 text-sm">
-                Learn music theory and practice with structured lessons covering notation, rhythm,
-                and more.
-              </p>
-              <p className="mt-1 text-gray-600 text-sm">
-                Progress through chapters at your own pace.
-              </p>
-              <motion.button
-                className="mt-4 bg-green-600 text-white py-2 px-4 rounded-full flex items-center text-sm font-medium"
-                whileHover={{ backgroundColor: '#15803d' }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => navigate('/lessons')}
-              >
-                Start Learning
-                <ChevronRight size={16} className="ml-1" />
-              </motion.button>
-            </div>
+            <span className="activity-icon">📚🎵</span>
+            <h3 className="activity-title">Musical Stories!</h3>
+            <p className="activity-description">
+              Join our musical adventures and learn amazing secrets about how music works!
+            </p>
+            <motion.button
+              className="kid-button"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Start Adventure! 🚀
+            </motion.button>
           </motion.div>
         </section>
 
         {/* Recent Progress Section */}
         <motion.section
-          className="mt-8 mb-12 bg-white rounded-lg shadow-sm p-6"
+          className="kid-welcome-section"
           variants={itemVariants}
         >
-          <h3 className="text-xl font-bold text-gray-800 mb-4">Your Recent Progress</h3>
+          <h2 className="kid-title text-3xl mb-6" style={{ position: 'relative', zIndex: 2 }}>Your Musical Journey! 🌈</h2>
 
           {isLoading ? (
             <div className="flex justify-center py-8">
-              <div className="w-8 h-8 border-t-2 border-b-2 border-indigo-600 rounded-full animate-spin"></div>
+              <div className="w-8 h-8 border-t-2 border-b-2 border-pink-500 rounded-full animate-spin"></div>
             </div>
           ) : error ? (
             <div className="bg-red-50 p-4 rounded-md text-red-600 text-sm mb-4">{error}</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4">
-              <div className="flex items-center">
-                <span className="text-gray-600 w-32">Ear Training:</span>
-                <div className="relative w-48 h-3 bg-gray-200 rounded-full overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ position: 'relative', zIndex: 2 }}>
+              <div className="flex flex-col items-center gap-3">
+                <span className="kid-subtitle text-lg font-bold">🎧 Ear Training</span>
+                <div className="kid-progress-bar w-full">
                   <motion.div
-                    className="absolute top-0 left-0 h-full bg-indigo-600 rounded-full"
+                    className="kid-progress-fill progress-ear-training"
                     initial={{ width: 0 }}
                     animate={{ width: `${userProgress.earTraining}%` }}
                     transition={{ duration: 1, delay: 0.2 }}
                   />
                 </div>
-                <span className="ml-3 text-gray-500 text-sm">{userProgress.earTraining}%</span>
+                <span className="kid-subtitle text-lg font-bold text-pink-500">{userProgress.earTraining}% Complete! 🎉</span>
               </div>
 
-              <div className="flex items-center">
-                <span className="text-gray-600 w-32">Music Generation:</span>
-                <div className="relative w-48 h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div className="flex flex-col items-center gap-3">
+                <span className="kid-subtitle text-lg font-bold">🎤 Singing</span>
+                <div className="kid-progress-bar w-full">
                   <motion.div
-                    className="absolute top-0 left-0 h-full bg-blue-600 rounded-full"
+                    className="kid-progress-fill progress-sight-singing"
                     initial={{ width: 0 }}
-                    animate={{ width: `${userProgress.musicGeneration}%` }}
+                    animate={{ width: `${userProgress.sightSinging}%` }}
                     transition={{ duration: 1, delay: 0.3 }}
                   />
                 </div>
-                <span className="ml-3 text-gray-500 text-sm">{userProgress.musicGeneration}%</span>
+                <span className="kid-subtitle text-lg font-bold text-pink-500">{userProgress.sightSinging}% Complete! 🌟</span>
               </div>
 
-              <div className="flex items-center">
-                <span className="text-gray-600 w-32">Sight Singing:</span>
-                <div className="relative w-48 h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div className="flex flex-col items-center gap-3">
+                <span className="kid-subtitle text-lg font-bold">🎹 Creating</span>
+                <div className="kid-progress-bar w-full">
                   <motion.div
-                    className="absolute top-0 left-0 h-full bg-amber-600 rounded-full"
+                    className="kid-progress-fill progress-music-generation"
                     initial={{ width: 0 }}
-                    animate={{ width: `${userProgress.sightSinging}%` }}
+                    animate={{ width: `${userProgress.musicGeneration}%` }}
                     transition={{ duration: 1, delay: 0.4 }}
                   />
                 </div>
-                <span className="ml-3 text-gray-500 text-sm">{userProgress.sightSinging}%</span>
+                <span className="kid-subtitle text-lg font-bold text-pink-500">{userProgress.musicGeneration}% Complete! 🚀</span>
               </div>
 
-              <div className="flex items-center">
-                <span className="text-gray-600 w-32">Lessons:</span>
-                <div className="relative w-48 h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div className="flex flex-col items-center gap-3">
+                <span className="kid-subtitle text-lg font-bold">📖 Learning</span>
+                <div className="kid-progress-bar w-full">
                   <motion.div
-                    className="absolute top-0 left-0 h-full bg-green-600 rounded-full"
+                    className="kid-progress-fill progress-lessons"
                     initial={{ width: 0 }}
                     animate={{ width: `${userProgress.lessons}%` }}
                     transition={{ duration: 1, delay: 0.5 }}
                   />
                 </div>
-                <span className="ml-3 text-gray-500 text-sm">{userProgress.lessons}%</span>
+                <span className="kid-subtitle text-lg font-bold text-pink-500">{userProgress.lessons}% Complete! 💪</span>
               </div>
             </div>
           )}
+
+          {/* Achievement badges */}
+          <div className="flex justify-center gap-4 mt-8 flex-wrap" style={{ position: 'relative', zIndex: 2 }}>
+            <div className="badge badge-gold">🏆</div>
+            <div className="badge badge-silver">🥈</div>
+            <div className="badge badge-bronze">🥉</div>
+            <div className="badge badge-gold">🎨</div>
+          </div>
         </motion.section>
       </motion.div>
     </Layout>

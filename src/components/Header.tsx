@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Menu, X, Music, LogOut } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header = () => {
@@ -42,118 +42,195 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="container mx-auto px-6 py-3">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <Link to="/" className="flex items-center text-indigo-600">
-            <Music size={28} className="mr-2" />
-            <span className="font-bold text-xl">Music Pals</span>
+    <header style={{
+      background: 'rgba(255, 255, 255, 0.95)',
+      backdropFilter: 'blur(10px)',
+      padding: '1rem 0',
+      boxShadow: '0 4px 20px rgba(255, 107, 157, 0.3)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
+      borderBottom: '4px solid #FF6B9D'
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        margin: '0 auto',
+        width: '100%',
+        padding: '0 2rem'
+      }}>
+        {/* Logo */}
+        <Link to="/" style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          textDecoration: 'none'
+        }}>
+          <span className="bouncing-logo" style={{ fontSize: '3rem' }}>🎵</span>
+          <span className="logo-text">Music Pals</span>
+        </Link>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-2">
+          {navItems.map(item => (
+            <Link
+              key={item.path}
+              to={item.path}
+              style={{
+                padding: '0.5rem 1rem',
+                borderRadius: '25px',
+                transition: 'all 0.3s ease',
+                fontFamily: 'Nunito, sans-serif',
+                fontWeight: 600,
+                textDecoration: 'none',
+                background: isActive(item.path) 
+                  ? 'linear-gradient(45deg, #FF6B9D, #FFE66D)'
+                  : 'transparent',
+                color: isActive(item.path) ? 'white' : '#666',
+                boxShadow: isActive(item.path) 
+                  ? '0 4px 15px rgba(255, 107, 157, 0.4)' 
+                  : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive(item.path)) {
+                  e.target.style.background = 'rgba(255, 107, 157, 0.1)';
+                  e.target.style.color = '#FF6B9D';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive(item.path)) {
+                  e.target.style.background = 'transparent';
+                  e.target.style.color = '#666';
+                }
+              }}
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
+
+        {/* User Info */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Link
+            to="/profile"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '1rem',
+              background: 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+              padding: '0.5rem 1.5rem',
+              borderRadius: '50px',
+              color: 'white',
+              fontWeight: 700,
+              boxShadow: '0 4px 15px rgba(255, 107, 157, 0.4)',
+              fontFamily: 'Nunito, sans-serif',
+              textDecoration: 'none',
+              transition: 'all 0.3s ease',
+              cursor: 'pointer'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'scale(1.05)';
+              e.target.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.6)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'scale(1)';
+              e.target.style.boxShadow = '0 4px 15px rgba(255, 107, 157, 0.4)';
+            }}
+          >
+            <span>🌟</span>
+            <span className="hidden sm:inline">Hey there, {user?.username || 'Musical Star'}!</span>
+            <span>🎭</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            {navItems.map(item => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`py-2 transition-colors ${
-                  isActive(item.path)
-                    ? 'text-indigo-600 font-medium'
-                    : 'text-gray-600 hover:text-indigo-600'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+              border: 'none',
+              color: 'white',
+              padding: '0.5rem 1rem',
+              borderRadius: '25px',
+              fontFamily: 'Nunito, sans-serif',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 4px 15px rgba(255, 107, 157, 0.4)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = 'scale(1)';
+            }}
+          >
+            Logout
+          </button>
 
-          {/* User Menu */}
-          <div className="flex items-center">
-            <div className="relative ml-4 hidden md:block">
-              <Link
-                to="/profile"
-                className="flex items-center bg-indigo-50 hover:bg-indigo-100 py-2 px-3 rounded-full transition-colors"
-              >
-                <div className="flex items-center justify-center w-8 h-8 bg-indigo-600 rounded-full text-white mr-2">
-                  <User size={16} />
-                </div>
-                <span className="text-gray-700 font-medium">{user?.username || 'User'}</span>
-              </Link>
-            </div>
-
-            {/* Logout Button (Desktop) */}
-            <button
-              onClick={handleLogout}
-              className="hidden md:flex items-center text-gray-600 hover:text-red-600 ml-6"
-            >
-              <LogOut size={18} className="mr-1" />
-              <span>Logout</span>
-            </button>
-
-            {/* Mobile Menu Button */}
-            <button
-              className="ml-4 md:hidden text-gray-600 hover:text-indigo-600 focus:outline-none"
-              onClick={toggleMenu}
-            >
-              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden"
+            onClick={toggleMenu}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#FF6B9D',
+              fontSize: '1.5rem',
+              cursor: 'pointer',
+              padding: '0.5rem'
+            }}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
-
-        {/* Mobile Navigation Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              className="md:hidden mt-3"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100">
-                <nav className="flex flex-col py-2">
-                  {navItems.map(item => (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`px-6 py-3 ${
-                        isActive(item.path)
-                          ? 'bg-indigo-50 text-indigo-600 font-medium'
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                      onClick={closeMenu}
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-
-                  <Link
-                    to="/profile"
-                    className={`px-6 py-3 flex items-center ${
-                      isActive('/profile')
-                        ? 'bg-indigo-50 text-indigo-600 font-medium'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                    onClick={closeMenu}
-                  >
-                    <User size={18} className="mr-2" />
-                    Profile
-                  </Link>
-
-                  <button
-                    onClick={handleLogout}
-                    className="px-6 py-3 text-left text-red-600 hover:bg-red-50 flex items-center"
-                  >
-                    <LogOut size={18} className="mr-2" />
-                    Logout
-                  </button>
-                </nav>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
+
+      {/* Mobile Navigation Menu */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            className="md:hidden mt-4"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: '20px',
+              boxShadow: '0 8px 30px rgba(255, 107, 157, 0.3)',
+              overflow: 'hidden',
+              border: '4px solid #FF6B9D'
+            }}>
+              <nav style={{ display: 'flex', flexDirection: 'column', padding: '0.5rem' }}>
+                {navItems.map(item => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={closeMenu}
+                    style={{
+                      padding: '1rem 1.5rem',
+                      fontFamily: 'Nunito, sans-serif',
+                      fontWeight: 600,
+                      textDecoration: 'none',
+                      borderRadius: '15px',
+                      margin: '0.25rem 0',
+                      background: isActive(item.path) 
+                        ? 'linear-gradient(45deg, #FF6B9D, #FFE66D)'
+                        : 'transparent',
+                      color: isActive(item.path) ? 'white' : '#666',
+                      transition: 'all 0.3s ease'
+                    }}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 };

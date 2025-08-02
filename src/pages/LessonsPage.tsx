@@ -575,7 +575,7 @@ const LessonsPage = () => {
           activeChapter.toString(),
           chapters[activeChapter].title,
           100, // Perfect score for completing a chapter
-          'Basic'
+          'Easy'
         );
 
         // Update overall progress
@@ -619,7 +619,7 @@ const LessonsPage = () => {
         activeChapter.toString(),
         `${chapters[activeChapter].title} - Practice`,
         85, // Score for practice (could be dynamic based on performance)
-        'Basic'
+        'Easy'
       );
 
       alert(`Practice for ${chapters[activeChapter].title} recorded successfully!`);
@@ -630,137 +630,107 @@ const LessonsPage = () => {
   };
 
   return (
-    <Layout backgroundClass="music-app-background">
+    <Layout backgroundClass="">
+      {/* Floating musical notes background */}
+      <div className="floating-notes">
+        <div className="note">🎵</div>
+        <div className="note">🎶</div>
+        <div className="note">🎼</div>
+        <div className="note">🎹</div>
+        <div className="note">🎺</div>
+        <div className="note">🎸</div>
+        <div className="note">🥁</div>
+        <div className="note">🎤</div>
+      </div>
+
       <motion.main
-        className="container mx-auto py-8 px-6"
+        className="py-8 px-4"
+        style={{
+          maxWidth: '1000px',
+          margin: '0 auto',
+          position: 'relative',
+          zIndex: 10,
+        }}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Page Header */}
-        <motion.div
-          className="bg-white rounded-lg shadow-sm p-6 flex justify-between items-center"
-          variants={itemVariants}
-        >
-          <div>
-            <h2
-              className="text-2xl font-bold text-gray-800"
-              style={{ fontFamily: 'Playfair Display, serif' }}
-            >
-              Music Lessons
-            </h2>
-            <p className="text-gray-600" style={{ fontFamily: 'Lato, sans-serif' }}>
-              Learn music theory and practice with structured lessons
-            </p>
-          </div>
-          <div className="text-green-600">
-            {/* Replace with the TrebleClef component in a real implementation */}
-            <BookOpen size={32} />
-          </div>
+        <motion.div className="kid-welcome-section" variants={itemVariants}>
+          <h1
+            className="kid-title text-4xl md:text-5xl mb-4"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
+            📚 Musical Stories & Adventures! 🎆
+          </h1>
+          <div className="musical-icon">🎩</div>
+          <p className="kid-subtitle text-xl" style={{ position: 'relative', zIndex: 2 }}>
+            Join our magical musical journey and learn amazing secrets about how music works!
+          </p>
         </motion.div>
-
-        {/* Decorative Music Staff */}
-        <div className="mt-4 opacity-10">
-          {/* This would be the MusicalStaff component in a real implementation */}
-          <div className="h-6 relative">
-            {[0, 1, 2, 3, 4].map(i => (
-              <div
-                key={`decorative-staff-${i}`}
-                className="absolute w-full h-px bg-green-800"
-                style={{ top: `${i * 6}px` }}
-              />
-            ))}
-          </div>
-        </div>
 
         {/* Show loading state */}
         {isLoading ? (
-          <div className="mt-6 bg-white rounded-lg shadow-sm p-8 flex justify-center">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 border-t-2 border-r-2 border-green-600 rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-600">Loading your lessons...</p>
+          <div className="kid-welcome-section flex justify-center">
+            <div className="flex flex-col items-center" style={{ position: 'relative', zIndex: 2 }}>
+              <div className="w-12 h-12 border-t-4 border-r-4 border-pink-500 rounded-full animate-spin mb-4"></div>
+              <p className="kid-subtitle text-lg">Loading your magical lessons... ✨</p>
             </div>
           </div>
         ) : (
-          <div className="mt-2 flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col lg:flex-row gap-6">
             {/* Chapter Navigation */}
-            <motion.div
-              className="md:w-72 bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-green-600"
-              variants={itemVariants}
-            >
-              <div className="bg-gray-50 p-4 border-b border-gray-200">
-                <h3
-                  className="text-lg font-semibold text-gray-800"
-                  style={{ fontFamily: 'Playfair Display, serif' }}
-                >
-                  Lesson Chapters
-                </h3>
-              </div>
+            <motion.div className="lg:w-72" variants={itemVariants}>
+              <div className="kid-welcome-section">
+                <div className="mb-3" style={{ position: 'relative', zIndex: 2 }}>
+                  <h3 className="activity-title text-lg text-center">📜 Chapters</h3>
+                </div>
 
-              <div className="p-3">
-                {chapters.map(chapter => (
-                  <motion.div
-                    key={chapter.id}
-                    className={`p-3 rounded-md mb-2 cursor-pointer flex items-center ${
-                      activeChapter === chapter.id
-                        ? 'bg-green-50 text-green-700 font-medium'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                    onClick={() => handleChapterSelect(chapter.id)}
-                    whileHover={{
-                      backgroundColor: activeChapter === chapter.id ? '#ecfdf5' : '#f9fafb',
-                    }}
-                    whileTap={{ scale: 0.98 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="mr-3">
-                      {userProgress[chapter.id] ? (
-                        <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                          <svg
-                            className="w-3 h-3 text-white"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        </div>
-                      ) : (
-                        <div className="w-5 h-5 border border-gray-300 rounded-full" />
-                      )}
-                    </div>
-                    <span style={{ fontFamily: 'Lato, sans-serif' }}>
-                      {chapter.id + 1}. {chapter.title}
-                    </span>
-                  </motion.div>
-                ))}
+                <div className="space-y-1.5" style={{ position: 'relative', zIndex: 2 }}>
+                  {chapters.map(chapter => (
+                    <motion.div
+                      key={chapter.id}
+                      className={`cursor-pointer flex items-center p-2.5 rounded-xl border-2 transition-all ${
+                        activeChapter === chapter.id 
+                          ? 'bg-yellow-100 border-yellow-400 ring-1 ring-yellow-300' 
+                          : 'bg-white bg-opacity-90 border-purple-200 hover:border-purple-300 hover:bg-purple-50'
+                      }`}
+                      onClick={() => handleChapterSelect(chapter.id)}
+                      whileHover={{ x: 3, scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                    >
+                      <div className="mr-2 flex-shrink-0">
+                        {userProgress[chapter.id] ? (
+                          <div className="text-base">✅</div>
+                        ) : (
+                          <div className="text-base">📖</div>
+                        )}
+                      </div>
+                      <span className="kid-subtitle font-bold text-sm flex-1 leading-tight break-words">
+                        {chapter.id + 1}. {chapter.title}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </motion.div>
 
             {/* Lesson Content */}
             <motion.div
-              className="flex-1 bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-green-600"
+              className="flex-1 kid-welcome-section"
               variants={itemVariants}
               key={activeChapter} // Re-animate when chapter changes
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="bg-gray-50 p-4 border-b border-gray-200">
-                <h3
-                  className="text-lg font-semibold text-gray-800"
-                  style={{ fontFamily: 'Playfair Display, serif' }}
-                >
-                  {chapters[activeChapter].title}
+              <div className="mb-6" style={{ position: 'relative', zIndex: 2 }}>
+                <h3 className="activity-title text-2xl text-center">
+                  🌟 {chapters[activeChapter].title} 🌟
                 </h3>
               </div>
 
-              <div className="p-6">
+              <div style={{ position: 'relative', zIndex: 2 }}>
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={`chapter-${activeChapter}`}
@@ -768,44 +738,59 @@ const LessonsPage = () => {
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     dangerouslySetInnerHTML={{ __html: chapters[activeChapter].content }}
-                    className="lesson-content"
-                    style={{ fontFamily: 'Lato, sans-serif' }}
+                    className="lesson-content kid-subtitle"
+                    style={{
+                      fontSize: '1.1rem',
+                      lineHeight: '1.6',
+                    }}
                   />
                 </AnimatePresence>
 
                 {/* Display errors if any */}
                 {error && (
-                  <div className="mt-4 bg-red-50 p-4 rounded-md text-red-600 text-sm">{error}</div>
+                  <div className="mt-4 bg-red-100 p-4 rounded-2xl border-4 border-red-300 text-red-700 text-center font-bold">
+                    😅 {error}
+                  </div>
                 )}
 
                 {/* Navigation Buttons */}
-                <div className="mt-8 flex justify-between items-center">
-                  <div className="bg-white border border-gray-200 rounded-md p-3">
-                    <span className="text-gray-600">
-                      Lesson Progress: {activeChapter + 1}/{chapters.length}
+                <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="bg-white bg-opacity-80 rounded-full px-4 py-2 shadow-lg">
+                    <span className="kid-subtitle font-bold">
+                      🎆 Adventure Progress: {activeChapter + 1}/{chapters.length} 🎆
                     </span>
                   </div>
 
                   <div className="flex gap-3">
                     <motion.button
-                      className="bg-white border border-green-600 text-green-600 py-2 px-6 rounded-md flex items-center"
-                      whileHover={{ backgroundColor: '#f9fafb' }}
-                      whileTap={{ scale: 0.98 }}
+                      className="kid-button"
+                      style={{
+                        background: 'linear-gradient(45deg, #95E1D3, #4ECDC4)',
+                      }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
                       onClick={handlePractice}
                     >
-                      <Play size={16} className="mr-1" />
-                      Practice
+                      🎤 Practice Magic!
                     </motion.button>
 
                     <motion.button
-                      className="bg-green-600 text-white py-2 px-6 rounded-md flex items-center"
-                      whileHover={{ backgroundColor: '#16a34a' }}
-                      whileTap={{ scale: 0.98 }}
+                      className="kid-button"
+                      style={{
+                        background:
+                          activeChapter === chapters.length - 1
+                            ? 'linear-gradient(45deg, #9CA3AF, #6B7280)'
+                            : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+                        opacity: activeChapter === chapters.length - 1 ? 0.5 : 1,
+                      }}
+                      whileHover={{ scale: activeChapter === chapters.length - 1 ? 1 : 1.1 }}
+                      whileTap={{ scale: activeChapter === chapters.length - 1 ? 1 : 0.95 }}
                       onClick={handleNextChapter}
                       disabled={activeChapter === chapters.length - 1}
                     >
-                      Next Lesson
-                      <ChevronRight size={16} className="ml-1" />
+                      {activeChapter === chapters.length - 1
+                        ? '🏆 Adventure Complete!'
+                        : '➡️ Next Adventure!'}
                     </motion.button>
                   </div>
                 </div>

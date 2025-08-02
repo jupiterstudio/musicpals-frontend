@@ -41,16 +41,16 @@ const authService = {
       // Send login request
       const loginResponse = await apiClient.post<AuthResponse>('/auth/login', { email, password });
 
-      // Store token in localStorage
-      localStorage.setItem('token', loginResponse.data.data.accessToken);
+      // Store token in sessionStorage (persists across page refreshes but clears when browser closes)
+      sessionStorage.setItem('token', loginResponse.data.data.accessToken);
 
       // Fetch complete user profile using the ID
       const profileResponse = await userAPI.getProfile();
       const userProfile = profileResponse.data;
 
-      // Cache some user info for quick access
-      localStorage.setItem('username', userProfile.username);
-      localStorage.setItem('userRank', userProfile.rank);
+      // Cache some user info for quick access in sessionStorage
+      sessionStorage.setItem('username', userProfile.username);
+      sessionStorage.setItem('userRank', userProfile.rank);
 
       return userProfile;
     } catch (error) {
@@ -95,15 +95,28 @@ const authService = {
 
   // Logout user
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('userRank');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('userRank');
     // Add any other cleanup needed
   },
 
   // Check if user is authenticated
   isAuthenticated: (): boolean => {
-    return !!localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
+    return !!token;
+  },
+
+  // Get stored token
+  getToken: (): string | null => {
+    return sessionStorage.getItem('token');
+  },
+
+  // Clear all stored auth data (enhanced logout)
+  clearAuthData: () => {
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('userRank');
   },
 };
 

@@ -704,25 +704,43 @@ const MusicGenerationPage = () => {
   };
 
   return (
-    <Layout>
+    <Layout backgroundClass="">
+      {/* Floating musical notes background */}
+      <div className="floating-notes">
+        <div className="note">🎵</div>
+        <div className="note">🎶</div>
+        <div className="note">🎼</div>
+        <div className="note">🎹</div>
+        <div className="note">🎺</div>
+        <div className="note">🎸</div>
+        <div className="note">🥁</div>
+        <div className="note">🎤</div>
+      </div>
+      
       <motion.main
-        className="container mx-auto py-8 px-6 sound-wave-background"
+        className="py-8 px-4"
+        style={{
+          maxWidth: '1000px',
+          margin: '0 auto',
+          position: 'relative',
+          zIndex: 10,
+        }}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Page Header */}
-        <motion.div
-          className="bg-white rounded-lg shadow-sm p-6 flex justify-between items-center"
-          variants={itemVariants}
-        >
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Music Generation</h2>
-            <p className="text-gray-600">Create and explore melodies with the piano roll</p>
-          </div>
-          <div className="text-indigo-600">
-            <Music size={32} />
-          </div>
+        <motion.div className="kid-welcome-section" variants={itemVariants}>
+          <h1
+            className="kid-title text-4xl md:text-5xl mb-4"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
+            🎼 Your Musical Creation! 🌟
+          </h1>
+          <div className="musical-icon">🎵</div>
+          <p className="kid-subtitle text-xl" style={{ position: 'relative', zIndex: 2 }}>
+            Create amazing melodies and let your creativity shine!
+          </p>
         </motion.div>
 
         {/* Achievement Notification */}
@@ -730,38 +748,44 @@ const MusicGenerationPage = () => {
           {showAchievementNotification && (
             <motion.div
               className="fixed top-4 right-4 bg-yellow-50 border border-yellow-300 shadow-md rounded-lg p-4 z-50 flex items-center"
+              style={{
+                maxWidth: '400px',
+                minWidth: '320px'
+              }}
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
             >
               <Award className="text-yellow-500 mr-3" size={24} />
               <div>
-                <h4 className="font-bold text-yellow-800">Achievement Unlocked!</h4>
-                <p className="text-yellow-700">Melody Maker: Generate your first original melody</p>
+                <h4 className="activity-title text-yellow-800">Achievement Unlocked! 🎉</h4>
+                <p className="kid-subtitle font-bold text-yellow-700">You're now a Melody Maker! 🎵✨</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Generation Controls */}
-        <motion.div className="mt-6 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-          <div className="flex flex-wrap items-center gap-4">
-            <div>
-              <span className="font-semibold text-gray-700 mr-4">Create New Melody:</span>
-            </div>
+        <motion.div className="mt-6 kid-welcome-section" variants={itemVariants}>
+          <h3 className="activity-title text-center mb-6" style={{ position: 'relative', zIndex: 2 }}>🎵 Create Your Musical Melody! ✨</h3>
+          <div className="flex flex-wrap justify-center items-center gap-4" style={{ position: 'relative', zIndex: 2 }}>
             <motion.button
-              className="py-2 px-8 rounded-full bg-indigo-600 text-white font-medium flex items-center transition-all"
+              className="kid-button"
+              style={{
+                background: isGenerating 
+                  ? 'linear-gradient(45deg, #9CA3AF, #6B7280)'
+                  : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+                opacity: isGenerating || !model ? 0.5 : 1
+              }}
               onClick={generateAndPlay}
               disabled={isGenerating || !model}
-              whileHover={{ scale: 1.05, backgroundColor: '#4338ca' }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 1 }} // Ensure initial visibility
-              animate={{ opacity: 1 }} // Maintain visibility in animated state
             >
               {isGenerating ? (
                 <>
                   <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -780,47 +804,58 @@ const MusicGenerationPage = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Generating...
+                  ✨ Creating Magic...
                 </>
               ) : (
                 <>
-                  <Music size={16} className="mr-2" />
-                  Generate Melody
+                  🎵 Generate New Melody!
                 </>
               )}
             </motion.button>
+            
             {/* Save Button */}
             <motion.button
-              className="py-2 px-6 rounded-full border border-indigo-600 text-indigo-600 font-medium flex items-center bg-white"
+              className="kid-button"
+              style={{
+                background: 'linear-gradient(45deg, #4ECDC4, #95E1D3)',
+                opacity: generatedNotes.length === 0 || isGenerating ? 0.5 : 1
+              }}
               onClick={handleSaveMelody}
               disabled={generatedNotes.length === 0 || isGenerating}
-              whileHover={{ scale: 1.05, backgroundColor: '#f9fafb' }}
+              whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Save size={16} className="mr-2" />
-              Save Melody
+              💾 Save My Creation!
             </motion.button>
-
-            {/* Total Melodies Saved */}
-            <div className="ml-auto px-3 py-1 bg-indigo-50 rounded-full text-indigo-700 text-sm flex items-center">
-              <Music size={14} className="mr-1" />
-              <span>
-                {melodiesSaved} {melodiesSaved === 1 ? 'Melody' : 'Melodies'} Saved
+          </div>
+          
+          {/* Melodies Saved Counter */}
+          <div className="mt-6 text-center" style={{ position: 'relative', zIndex: 2 }}>
+            <div className="inline-flex items-center gap-2 bg-white bg-opacity-80 rounded-full px-6 py-3 shadow-lg">
+              <span className="text-2xl">🎵</span>
+              <span className="kid-subtitle font-bold text-lg">
+                {melodiesSaved} {melodiesSaved === 1 ? 'Melody' : 'Melodies'} Created!
               </span>
+              <span className="text-2xl">🎉</span>
             </div>
           </div>
-
+          
           {loadingMessage && (
-            <div className="mt-3 text-amber-600 font-medium text-sm">{loadingMessage}</div>
+            <div className="mt-4 text-center text-yellow-600 font-bold" style={{ position: 'relative', zIndex: 2 }}>
+              {loadingMessage} 🎼
+            </div>
           )}
-
-          {error && <div className="mt-3 text-red-600 text-sm">{error}</div>}
+          {error && (
+            <div className="mt-4 text-center text-red-600 font-bold" style={{ position: 'relative', zIndex: 2 }}>
+              {error} 😅
+            </div>
+          )}
         </motion.div>
 
         {/* Piano Roll Display */}
-        <motion.div className="mt-6 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-semibold text-gray-700">Generated Melody:</h3>
+        <motion.div className="mt-6 kid-welcome-section" variants={itemVariants}>
+          <div className="flex justify-between items-center mb-4" style={{ position: 'relative', zIndex: 2 }}>
+            <h3 className="activity-title text-xl">🎼 Your Musical Creation!</h3>
             <div className="flex items-center space-x-2">
               {/* View Controls */}
               <div className="flex border border-gray-200 rounded-md mr-4">
@@ -849,20 +884,24 @@ const MusicGenerationPage = () => {
               {/* Play/Pause Button */}
               <motion.button
                 onClick={togglePlayback}
-                className={`w-10 h-10 rounded-full ${
-                  isPlaying ? 'bg-red-500 hover:bg-red-600' : 'bg-indigo-600 hover:bg-indigo-700'
-                } flex items-center justify-center text-white`}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                className="kid-button"
+                style={{
+                  background: isPlaying 
+                    ? 'linear-gradient(45deg, #ef4444, #f87171)'
+                    : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+                  opacity: generatedNotes.length === 0 ? 0.5 : 1
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 disabled={generatedNotes.length === 0}
               >
-                {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                {isPlaying ? '⏸️ Stop Music' : '▶️ Play My Song!'}
               </motion.button>
             </div>
           </div>
 
           {/* Piano Roll */}
-          <div className="piano-roll-container relative border border-gray-200 rounded-md overflow-hidden">
+          <div className="piano-roll-container relative border border-gray-200 rounded-md overflow-hidden" style={{ position: 'relative', zIndex: 2 }}>
             <div className="flex">
               {/* Piano Keys */}
               <div className="piano-keys w-12 border-r border-gray-200 bg-white">
@@ -975,59 +1014,48 @@ const MusicGenerationPage = () => {
           </div>
 
           {/* Note Count Indicator */}
-          <div className="mt-2 text-sm text-gray-500 flex justify-between items-center">
-            <div>
-              {generatedNotes.length > 0 ? (
-                <>
-                  <span className="font-medium">Notes:</span> {generatedNotes.length} |
-                  <span className="font-medium ml-2">Range:</span>{' '}
-                  {getNoteNameFromPitch(Math.min(...generatedNotes.map(n => n.pitch)))} to{' '}
-                  {getNoteNameFromPitch(Math.max(...generatedNotes.map(n => n.pitch)))} |
-                  <span className="font-medium ml-2">Duration:</span> {sequenceDuration.toFixed(1)}s
-                </>
-              ) : (
-                'No notes to display'
-              )}
-            </div>
-            <div>
-              <span className="text-xs text-gray-400">
-                Use zoom and navigation controls to adjust view
-              </span>
+          <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-md" style={{ position: 'relative', zIndex: 2 }}>
+            <div className="flex justify-between items-center text-sm">
+              <div>
+                {generatedNotes.length > 0 ? (
+                  <>
+                    <span className="kid-subtitle font-bold">🎵 Notes:</span> {generatedNotes.length} |
+                    <span className="kid-subtitle font-bold ml-2">🎹 Range:</span>{' '}
+                    {getNoteNameFromPitch(Math.min(...generatedNotes.map(n => n.pitch)))} to{' '}
+                    {getNoteNameFromPitch(Math.max(...generatedNotes.map(n => n.pitch)))} |
+                    <span className="kid-subtitle font-bold ml-2">⏱️ Duration:</span> {sequenceDuration.toFixed(1)}s
+                  </>
+                ) : (
+                  <span className="kid-subtitle font-bold">🌟 Generate a melody to see the magic!</span>
+                )}
+              </div>
+              <div>
+                <span className="kid-subtitle text-sm">
+                  Use zoom and navigation controls to adjust view
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Playback Progress Bar */}
-          {generatedNotes.length > 0 && (
-            <div className="mt-4 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-indigo-600 rounded-full"
-                style={{
-                  width: `${Math.min(
-                    100,
-                    (currentTime / Math.max(...generatedNotes.map(n => n.endTime))) * 100
-                  )}%`,
-                }}
-              ></motion.div>
-            </div>
-          )}
         </motion.div>
 
         {/* Saved Melodies Section (if available) */}
         {savedMelodies.length > 0 && (
-          <motion.div className="mt-6 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-            <h3 className="font-semibold text-gray-700 mb-4">Your Saved Melodies:</h3>
+          <motion.div className="mt-6 kid-welcome-section" variants={itemVariants}>
+            <h3 className="activity-title text-xl mb-4" style={{ position: 'relative', zIndex: 2 }}>🏆 Your Saved Melodies</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" style={{ position: 'relative', zIndex: 2 }}>
               {savedMelodies.map(melody => (
                 <motion.div
                   key={melody.id}
-                  className="bg-white border rounded-lg p-4 shadow-sm"
-                  whileHover={{ y: -5, boxShadow: '0 4px 10px rgba(0, 0, 0, 0.05)' }}
+                  className="kid-card music-generation"
+                  whileHover={{ y: -10, scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <h4 className="font-medium text-gray-800 mb-2">{melody.name}</h4>
+                  <h4 className="activity-title text-lg mb-2">{melody.name} ✨</h4>
 
                   {/* Mini Piano Roll */}
-                  <div className="mini-piano-roll h-16 relative bg-gray-50 rounded border border-gray-200 mb-3 overflow-hidden">
+                  <div className="mini-piano-roll h-16 relative bg-gray-50 rounded-md border border-gray-200 mb-3 overflow-hidden">
                     {/* Notes visualization */}
                     {melody.notes.map((note, index) => {
                       const totalDuration = Math.max(...melody.notes.map(n => n.endTime));
@@ -1048,16 +1076,19 @@ const MusicGenerationPage = () => {
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-gray-500">{formatDate(melody.dateCreated)}</span>
+                    <span className="kid-subtitle text-sm font-bold">{formatDate(melody.dateCreated)}</span>
 
                     {/* Play button */}
                     <motion.button
-                      className="w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center text-white"
+                      className="kid-button text-sm px-4 py-2"
+                      style={{
+                        background: 'linear-gradient(45deg, #4ECDC4, #95E1D3)'
+                      }}
                       onClick={() => playSavedMelody(melody)}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                     >
-                      <Play size={14} />
+                      ▶️ Play
                     </motion.button>
                   </div>
                 </motion.div>
@@ -1067,22 +1098,23 @@ const MusicGenerationPage = () => {
         )}
 
         {/* Sample Melodies Section */}
-        <motion.div className="mt-6 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-          <h3 className="font-semibold text-gray-700 mb-4">Sample Melodies:</h3>
+        <motion.div className="mt-6 kid-welcome-section" variants={itemVariants}>
+          <h3 className="activity-title text-xl mb-4" style={{ position: 'relative', zIndex: 2 }}>🎵 Sample Melodies</h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" style={{ position: 'relative', zIndex: 2 }}>
             {sampleMelodies.map(sample => (
               <motion.div
                 key={sample.id}
-                className={`bg-white border rounded-lg p-4 shadow-sm ${
-                  currentPlayingSample === sample.id ? 'ring-2 ring-indigo-500' : ''
+                className={`kid-card music-generation ${
+                  currentPlayingSample === sample.id ? 'ring-4 ring-pink-400' : ''
                 }`}
-                whileHover={{ y: -5, boxShadow: '0 4px 10px rgba(0, 0, 0, 0.05)' }}
+                whileHover={{ y: -10, scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                <h4 className="font-medium text-gray-800 mb-2">{sample.name}</h4>
+                <h4 className="activity-title text-lg mb-2">{sample.name} 🎶</h4>
 
                 {/* Mini Piano Roll */}
-                <div className="mini-piano-roll h-16 relative bg-gray-50 rounded border border-gray-200 mb-3 overflow-hidden">
+                <div className="mini-piano-roll h-16 relative bg-gray-50 rounded-md border border-gray-200 mb-3 overflow-hidden">
                   {/* Piano keys indicator */}
                   <div className="absolute left-0 top-0 bottom-0 w-2 bg-gray-100 border-r border-gray-200"></div>
 
@@ -1123,19 +1155,20 @@ const MusicGenerationPage = () => {
 
                 {/* Play button */}
                 <motion.button
-                  className={`w-8 h-8 rounded-full ${
-                    currentPlayingSample === sample.id && isPlaying
-                      ? 'bg-red-500 hover:bg-red-600'
-                      : 'bg-indigo-600 hover:bg-indigo-700'
-                  } flex items-center justify-center text-white`}
+                  className="kid-button text-sm px-4 py-2"
+                  style={{
+                    background: currentPlayingSample === sample.id && isPlaying
+                      ? 'linear-gradient(45deg, #ef4444, #f87171)'
+                      : 'linear-gradient(45deg, #FF6B9D, #4ECDC4)'
+                  }}
                   onClick={() => playSampleMelody(sample.id)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
                   {currentPlayingSample === sample.id && isPlaying ? (
-                    <Pause size={14} />
+                    <>⏸️ Stop</>
                   ) : (
-                    <Play size={14} />
+                    <>▶️ Play</>
                   )}
                 </motion.button>
               </motion.div>
@@ -1147,11 +1180,10 @@ const MusicGenerationPage = () => {
         {showSaveDialog && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Save Melody</h3>
-
+              <h3 className="activity-title text-xl mb-4">💾 Save Your Melody! ✨</h3>
               <div className="mb-4">
-                <label htmlFor="melodyName" className="block text-gray-700 mb-2">
-                  Melody Name:
+                <label htmlFor="melodyName" className="block kid-subtitle font-bold mb-2">
+                  🎵 Melody Name:
                 </label>
                 <input
                   type="text"
@@ -1159,10 +1191,9 @@ const MusicGenerationPage = () => {
                   className="w-full border border-gray-300 rounded-md p-2"
                   value={saveMelodyName}
                   onChange={e => setSaveMelodyName(e.target.value)}
-                  placeholder="Enter a name for your melody"
+                  placeholder="My Amazing Melody! 🎶"
                 />
               </div>
-
               <div className="flex justify-end gap-3">
                 <button
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700"
@@ -1174,7 +1205,6 @@ const MusicGenerationPage = () => {
                 >
                   Cancel
                 </button>
-
                 <button
                   className="px-4 py-2 bg-indigo-600 text-white rounded-md flex items-center"
                   onClick={confirmSaveMelody}
@@ -1202,12 +1232,12 @@ const MusicGenerationPage = () => {
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         ></path>
                       </svg>
-                      Saving...
+                      Saving... ✨
                     </>
                   ) : (
                     <>
                       <Save size={16} className="mr-2" />
-                      Save Melody
+                      Save Melody! 🎉
                     </>
                   )}
                 </button>

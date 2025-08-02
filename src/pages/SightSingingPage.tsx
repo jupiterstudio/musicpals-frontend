@@ -1151,245 +1151,279 @@ const SightSingingPage = () => {
   };
 
   return (
-    <Layout backgroundClass="sound-wave-background">
+    <Layout backgroundClass="">
+      {/* Floating musical notes background */}
+      <div className="floating-notes">
+        <div className="note">🎵</div>
+        <div className="note">🎶</div>
+        <div className="note">🎼</div>
+        <div className="note">🎹</div>
+        <div className="note">🎺</div>
+        <div className="note">🎸</div>
+        <div className="note">🥁</div>
+        <div className="note">🎤</div>
+      </div>
+
       <motion.main
-        className="container mx-auto py-8 px-6"
+        className="py-8 px-4"
+        style={{
+          maxWidth: '1000px',
+          margin: '0 auto',
+          position: 'relative',
+          zIndex: 10
+        }}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Page Header */}
         <motion.div
-          className="bg-white rounded-lg shadow-sm p-6 flex justify-between items-center"
+          className="kid-welcome-section"
           variants={itemVariants}
         >
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Sight Singing</h2>
-            <p className="text-gray-600">
-              Practice singing musical notation with real-time feedback
-            </p>
-          </div>
-          <div className="text-indigo-600">
-            <Mic size={32} />
-          </div>
+          <h1 className="kid-title text-4xl md:text-5xl mb-4" style={{ position: 'relative', zIndex: 2 }}>
+            🎤 Singing Star Studio! ✨
+          </h1>
+          <div className="musical-icon">🎆</div>
+          <p className="kid-subtitle text-xl" style={{ position: 'relative', zIndex: 2 }}>
+            Sing along with the notes and watch them light up! Become the next big singing sensation!
+          </p>
         </motion.div>
 
         {/* Loading State */}
         {isLoading ? (
-          <div className="mt-6 bg-white rounded-lg shadow-sm p-8 flex justify-center">
-            <div className="flex flex-col items-center">
-              <div className="w-12 h-12 border-t-2 border-r-2 border-amber-600 rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-600">Loading your sight singing data...</p>
+          <div className="kid-welcome-section flex justify-center">
+            <div className="flex flex-col items-center" style={{ position: 'relative', zIndex: 2 }}>
+              <div className="w-12 h-12 border-t-4 border-r-4 border-pink-500 rounded-full animate-spin mb-4"></div>
+              <p className="kid-subtitle text-lg">Getting your singing stage ready... 🎤✨</p>
             </div>
           </div>
         ) : (
           <>
             {/* Difficulty Selection */}
-            <motion.div className="mt-6 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-              <div className="flex items-center">
-                <span className="font-semibold text-gray-700 mr-4">Difficulty:</span>
-                <div className="flex space-x-3">
+            <motion.div className="kid-welcome-section" variants={itemVariants}>
+              <div className="text-center" style={{ position: 'relative', zIndex: 2 }}>
+                <h3 className="activity-title text-2xl mb-4">🎆 Choose Your Challenge Level! 🎆</h3>
+                <div className="flex justify-center flex-wrap gap-4">
                   <motion.button
-                    className={`py-1.5 px-6 rounded-full ${
-                      selectedDifficulty === 'Easy'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 border border-gray-200'
-                    } text-sm font-medium`}
-                    whileHover={{
-                      scale: 1.05,
-                      backgroundColor: selectedDifficulty === 'Easy' ? '#4338ca' : '#f3f4f6',
+                    className="kid-button"
+                    style={{
+                      background: selectedDifficulty === 'Easy'
+                        ? 'linear-gradient(45deg, #95E1D3, #4ECDC4)'
+                        : 'linear-gradient(45deg, #E5E5E5, #CCCCCC)',
+                      opacity: selectedDifficulty === 'Easy' ? 1 : 0.7
                     }}
+                    whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedDifficulty('Easy')}
                   >
-                    Easy
+                    🌱 Easy Peasy!
                   </motion.button>
                   <motion.button
-                    className={`py-1.5 px-6 rounded-full ${
-                      selectedDifficulty === 'Medium'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 border border-gray-200'
-                    } text-sm font-medium`}
-                    whileHover={{
-                      scale: 1.05,
-                      backgroundColor: selectedDifficulty === 'Medium' ? '#4338ca' : '#f3f4f6',
+                    className="kid-button"
+                    style={{
+                      background: selectedDifficulty === 'Medium'
+                        ? 'linear-gradient(45deg, #FFE66D, #FF6B9D)'
+                        : 'linear-gradient(45deg, #E5E5E5, #CCCCCC)',
+                      opacity: selectedDifficulty === 'Medium' ? 1 : 0.7
                     }}
+                    whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedDifficulty('Medium')}
                   >
-                    Medium
+                    🎆 Medium Fun!
                   </motion.button>
                   <motion.button
-                    className={`py-1.5 px-6 rounded-full ${
-                      selectedDifficulty === 'Hard'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 border border-gray-200'
-                    } text-sm font-medium`}
-                    whileHover={{
-                      scale: 1.05,
-                      backgroundColor: selectedDifficulty === 'Hard' ? '#4338ca' : '#f3f4f6',
+                    className="kid-button"
+                    style={{
+                      background: selectedDifficulty === 'Hard'
+                        ? 'linear-gradient(45deg, #FF6B9D, #9B59B6)'
+                        : 'linear-gradient(45deg, #E5E5E5, #CCCCCC)',
+                      opacity: selectedDifficulty === 'Hard' ? 1 : 0.7
                     }}
+                    whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setSelectedDifficulty('Hard')}
                   >
-                    Hard
+                    🔥 Super Challenge!
                   </motion.button>
                 </div>
               </div>
             </motion.div>
 
             {/* Exercise Type Selection */}
-            <motion.div className="mt-4 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-              <div className="flex items-center flex-wrap">
-                <span className="font-semibold text-gray-700 mr-4 mb-2">Exercise Type:</span>
-                <div className="flex flex-wrap gap-3">
+            <motion.div className="kid-welcome-section" variants={itemVariants}>
+              <div className="text-center" style={{ position: "relative", zIndex: 2 }}>
+                <h3 className="activity-title text-2xl mb-4">🎵 Pick Your Singing Adventure! 🎵</h3>
+                <div className="flex justify-center flex-wrap gap-3">
                   <motion.button
-                    className={`py-1.5 px-6 rounded-full ${
-                      selectedExerciseType === 'All'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 border border-gray-200'
-                    } text-sm font-medium`}
-                    whileHover={{
-                      scale: 1.05,
-                      backgroundColor: selectedExerciseType === 'All' ? '#4338ca' : '#f3f4f6',
+                    className="kid-button"
+                    style={{
+                      background: selectedExerciseType === "All"
+                        ? "linear-gradient(45deg, #FF6B9D, #FFE66D)"
+                        : "linear-gradient(45deg, #E5E5E5, #CCCCCC)",
+                      opacity: selectedExerciseType === "All" ? 1 : 0.7,
+                      fontSize: "0.9rem",
+                      padding: "0.75rem 1.5rem"
                     }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedExerciseType('All')}
+                    onClick={() => setSelectedExerciseType("All")}
                   >
-                    All
+                    🌈 Everything!
                   </motion.button>
                   <motion.button
-                    className={`py-1.5 px-6 rounded-full ${
-                      selectedExerciseType === 'Notes'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 border border-gray-200'
-                    } text-sm font-medium`}
-                    whileHover={{
-                      scale: 1.05,
-                      backgroundColor: selectedExerciseType === 'Notes' ? '#4338ca' : '#f3f4f6',
+                    className="kid-button"
+                    style={{
+                      background: selectedExerciseType === "Notes"
+                        ? "linear-gradient(45deg, #4ECDC4, #95E1D3)"
+                        : "linear-gradient(45deg, #E5E5E5, #CCCCCC)",
+                      opacity: selectedExerciseType === "Notes" ? 1 : 0.7,
+                      fontSize: "0.9rem",
+                      padding: "0.75rem 1.5rem"
                     }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedExerciseType('Notes')}
+                    onClick={() => setSelectedExerciseType("Notes")}
                   >
-                    Notes
+                    🎵 Single Notes
                   </motion.button>
                   <motion.button
-                    className={`py-1.5 px-6 rounded-full ${
-                      selectedExerciseType === 'Intervals'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 border border-gray-200'
-                    } text-sm font-medium`}
-                    whileHover={{
-                      scale: 1.05,
-                      backgroundColor: selectedExerciseType === 'Intervals' ? '#4338ca' : '#f3f4f6',
+                    className="kid-button"
+                    style={{
+                      background: selectedExerciseType === "Intervals"
+                        ? "linear-gradient(45deg, #FFE66D, #95E1D3)"
+                        : "linear-gradient(45deg, #E5E5E5, #CCCCCC)",
+                      opacity: selectedExerciseType === "Intervals" ? 1 : 0.7,
+                      fontSize: "0.9rem",
+                      padding: "0.75rem 1.5rem"
                     }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedExerciseType('Intervals')}
+                    onClick={() => setSelectedExerciseType("Intervals")}
                   >
-                    Intervals
+                    🎶 Note Jumps
                   </motion.button>
                   <motion.button
-                    className={`py-1.5 px-6 rounded-full ${
-                      selectedExerciseType === 'Scales'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 border border-gray-200'
-                    } text-sm font-medium`}
-                    whileHover={{
-                      scale: 1.05,
-                      backgroundColor: selectedExerciseType === 'Scales' ? '#4338ca' : '#f3f4f6',
+                    className="kid-button"
+                    style={{
+                      background: selectedExerciseType === "Scales"
+                        ? "linear-gradient(45deg, #95E1D3, #FF6B9D)"
+                        : "linear-gradient(45deg, #E5E5E5, #CCCCCC)",
+                      opacity: selectedExerciseType === "Scales" ? 1 : 0.7,
+                      fontSize: "0.9rem",
+                      padding: "0.75rem 1.5rem"
                     }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedExerciseType('Scales')}
+                    onClick={() => setSelectedExerciseType("Scales")}
                   >
-                    Scales
+                    🎼 Note Ladders
                   </motion.button>
                   <motion.button
-                    className={`py-1.5 px-6 rounded-full ${
-                      selectedExerciseType === 'Melody'
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 border border-gray-200'
-                    } text-sm font-medium`}
-                    whileHover={{
-                      scale: 1.05,
-                      backgroundColor: selectedExerciseType === 'Melody' ? '#4338ca' : '#f3f4f6',
+                    className="kid-button"
+                    style={{
+                      background: selectedExerciseType === "Melody"
+                        ? "linear-gradient(45deg, #9B59B6, #FFE66D)"
+                        : "linear-gradient(45deg, #E5E5E5, #CCCCCC)",
+                      opacity: selectedExerciseType === "Melody" ? 1 : 0.7,
+                      fontSize: "0.9rem",
+                      padding: "0.75rem 1.5rem"
                     }}
+                    whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedExerciseType('Melody')}
+                    onClick={() => setSelectedExerciseType("Melody")}
                   >
-                    Melody
+                    🎵 Fun Songs
                   </motion.button>
                 </div>
               </div>
             </motion.div>
 
             {/* Practice Mode Selection */}
-            <motion.div className="mt-4 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-              <div className="flex flex-col sm:flex-row items-center justify-between">
-                <span className="font-semibold text-gray-700 mb-3 sm:mb-0">Practice Mode:</span>
-                <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
-                  <button
-                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-md text-sm flex items-center justify-center ${
-                      practiceMode === 'note-by-note'
-                        ? 'bg-indigo-600 text-white'
-                        : 'text-gray-700 hover:bg-gray-200'
-                    }`}
-                    onClick={() => setPracticeMode('note-by-note')}
+            <motion.div className="kid-welcome-section" variants={itemVariants}>
+              <div className="text-center" style={{ position: "relative", zIndex: 2 }}>
+                <h3 className="activity-title text-2xl mb-4">🎯 Choose Your Practice Style! 🎯</h3>
+                <div className="flex justify-center flex-wrap gap-4 mb-4">
+                  <motion.button
+                    className="kid-button"
+                    style={{
+                      background: practiceMode === "note-by-note"
+                        ? "linear-gradient(45deg, #4ECDC4, #95E1D3)"
+                        : "linear-gradient(45deg, #E5E5E5, #CCCCCC)",
+                      opacity: practiceMode === "note-by-note" ? 1 : 0.7
+                    }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setPracticeMode("note-by-note")}
                   >
-                    <List size={16} className="mr-2" />
-                    Note by Note
-                  </button>
-                  <button
-                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-md text-sm flex items-center justify-center ${
-                      practiceMode === 'full-melody'
-                        ? 'bg-indigo-600 text-white'
-                        : 'text-gray-700 hover:bg-gray-200'
-                    }`}
-                    onClick={() => setPracticeMode('full-melody')}
+                    🎵 One Note at a Time!
+                  </motion.button>
+                  <motion.button
+                    className="kid-button"
+                    style={{
+                      background: practiceMode === "full-melody"
+                        ? "linear-gradient(45deg, #FFE66D, #FF6B9D)"
+                        : "linear-gradient(45deg, #E5E5E5, #CCCCCC)",
+                      opacity: practiceMode === "full-melody" ? 1 : 0.7
+                    }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setPracticeMode("full-melody")}
                   >
-                    <Music size={16} className="mr-2" />
-                    Full Melody
-                  </button>
+                    🎶 Whole Song!
+                  </motion.button>
                 </div>
-              </div>
-              <div className="mt-3 text-sm text-gray-500">
-                {practiceMode === 'note-by-note'
-                  ? 'Note-by-Note: Get feedback on each note as you sing. Good for beginners.'
-                  : 'Full Melody: Sing the entire melody at once. Best for building musical fluency.'}
+                <div className="bg-white bg-opacity-80 rounded-2xl px-4 py-2 inline-block">
+                  <p className="kid-subtitle text-sm">
+                    {practiceMode === "note-by-note"
+                      ? "🌟 Perfect for beginners! Get help with each note!"
+                      : "🚀 Ready for a challenge? Sing the whole melody!"}
+                  </p>
+                </div>
               </div>
             </motion.div>
 
             {/* Display any API errors */}
             {error && (
               <motion.div
-                className="mt-4 bg-red-50 p-4 rounded-md text-red-600 text-sm"
+                className="kid-welcome-section"
                 variants={itemVariants}
               >
-                {error}
+                <div className="text-center" style={{ position: 'relative', zIndex: 2 }}>
+                  <p className="kid-subtitle text-lg font-bold text-red-600">
+                    😅 {error}
+                  </p>
+                </div>
               </motion.div>
             )}
 
             {/* Music Notation */}
-            <motion.div className="mt-6 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold text-gray-700">
+            <motion.div className="kid-welcome-section" variants={itemVariants}>
+              <div className="flex justify-between items-center mb-4" style={{ position: 'relative', zIndex: 2 }}>
+                <h3 className="activity-title text-2xl">
                   {practiceMode === 'note-by-note'
-                    ? `Sing This Note: ${filteredExercises[currentExercise]?.notes[currentNoteIndex]}`
-                    : `Sing This ${
+                    ? `🎵 Sing This Note: ${filteredExercises[currentExercise]?.notes[currentNoteIndex]} 🎵`
+                    : `🎶 Sing This ${
                         selectedExerciseType === 'All'
                           ? filteredExercises[currentExercise]?.exerciseType
                           : selectedExerciseType
-                      }:`}
+                      }! 🎶`}
                 </h3>
                 <motion.button
-                  className="text-indigo-600 p-2 rounded-full hover:bg-indigo-50 flex items-center"
+                  className="kid-button"
+                  style={{
+                    background: 'linear-gradient(45deg, #4ECDC4, #95E1D3)',
+                    fontSize: '0.9rem',
+                    padding: '0.75rem 1.5rem',
+                    opacity: isPlayingReference ? 0.5 : 1
+                  }}
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={playReferenceNote}
                   disabled={isPlayingReference}
                 >
-                  <Play size={16} />
-                  <span className="ml-1 text-sm">
-                    {practiceMode === 'note-by-note' ? 'Play Reference Note' : 'Play Full Melody'}
-                  </span>
+                  {practiceMode === 'note-by-note' ? '🎵 Hear the Note!' : '🎶 Play Full Song!'}
                 </motion.button>
               </div>
 
@@ -1404,83 +1438,117 @@ const SightSingingPage = () => {
                   </div>
                 )}
 
-                {filteredExercises[currentExercise]?.notes.length > 4 && (
-                  <div className="flex justify-between items-center mt-3">
-                    <button
-                      className={`px-3 py-1 rounded text-sm ${
-                        currentPage > 0
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      }`}
-                      onClick={handlePrevPage}
-                      disabled={currentPage === 0}
-                    >
-                      ← Previous
-                    </button>
-                    <span className="text-sm text-gray-600">
-                      Page {currentPage + 1} of{' '}
-                      {Math.ceil(filteredExercises[currentExercise]?.notes.length / 4)}
-                    </span>
-                    <button
-                      className={`px-3 py-1 rounded text-sm ${
-                        currentPage <
-                        Math.ceil(filteredExercises[currentExercise]?.notes.length / 4) - 1
-                          ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      }`}
-                      onClick={handleNextPage}
-                      disabled={
-                        currentPage >=
-                        Math.ceil(filteredExercises[currentExercise]?.notes.length / 4) - 1
-                      }
-                    >
-                      Next →
-                    </button>
-                  </div>
-                )}
+                {filteredExercises[currentExercise]?.notes.length > 4 && (() => {
+                  const { totalPages } = calculatePagination(filteredExercises[currentExercise]);
+                  const isLastPage = currentPage >= totalPages - 1;
+                  const isFirstPage = currentPage === 0;
+                  
+                  return (
+                    <div className="flex justify-between items-center mt-3">
+                      <motion.button
+                        className={`kid-button text-sm ${
+                          isFirstPage
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        }`}
+                        style={{
+                          background: !isFirstPage 
+                            ? 'linear-gradient(45deg, #FF6B9D, #FFE66D)' 
+                            : 'linear-gradient(45deg, #9CA3AF, #6B7280)',
+                          fontSize: '0.9rem',
+                          padding: '0.5rem 1rem'
+                        }}
+                        whileHover={{ scale: !isFirstPage ? 1.05 : 1 }}
+                        whileTap={{ scale: !isFirstPage ? 0.95 : 1 }}
+                        onClick={handlePrevPage}
+                        disabled={isFirstPage}
+                      >
+                        ← Previous Page
+                      </motion.button>
+                      <span className="kid-subtitle font-bold">
+                        🎵 Page {currentPage + 1} of {totalPages} 🎵
+                      </span>
+                      <motion.button
+                        className={`kid-button text-sm ${
+                          isLastPage
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        }`}
+                        style={{
+                          background: !isLastPage
+                            ? 'linear-gradient(45deg, #FF6B9D, #FFE66D)' 
+                            : 'linear-gradient(45deg, #9CA3AF, #6B7280)',
+                          fontSize: '0.9rem',
+                          padding: '0.5rem 1rem'
+                        }}
+                        whileHover={{ scale: !isLastPage ? 1.05 : 1 }}
+                        whileTap={{ scale: !isLastPage ? 0.95 : 1 }}
+                        onClick={handleNextPage}
+                        disabled={isLastPage}
+                      >
+                        Next Page →
+                      </motion.button>
+                    </div>
+                  );
+                })()}
               </div>
 
-              <div className="text-center text-gray-500 text-sm">
+              <div className="text-center" style={{ position: 'relative', zIndex: 2 }}>
                 {filteredExercises.length > 0 ? (
-                  <p>
-                    Exercise: {filteredExercises[currentExercise]?.name}
+                  <p className="kid-subtitle font-bold">
+                    🎼 Exercise: {filteredExercises[currentExercise]?.name} 🎼
                     {practiceMode === 'note-by-note' && (
                       <>
                         {' '}
-                        - Note {currentNoteIndex + 1} of{' '}
-                        {filteredExercises[currentExercise]?.notes.length}
+                        🎵 Note {currentNoteIndex + 1} of{' '}
+                        {filteredExercises[currentExercise]?.notes.length} 🎵
                       </>
                     )}
                   </p>
                 ) : (
-                  <p>No exercises available for the selected difficulty and type</p>
+                  <p className="kid-subtitle font-bold text-red-600">
+                    😅 No musical adventures available for the selected settings! Try different options! 🎯
+                  </p>
                 )}
               </div>
             </motion.div>
 
             {/* Recording Interface */}
-            <motion.div className="mt-6 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-              <div className="flex flex-wrap justify-between items-start">
+            <motion.div className="kid-welcome-section" variants={itemVariants}>
+              <h3 className="activity-title text-center mb-6" style={{ position: 'relative', zIndex: 2 }}>🎤 Time to Sing Your Heart Out! 🎤</h3>
+              <div className="flex flex-wrap justify-between items-start" style={{ position: 'relative', zIndex: 2 }}>
                 {/* Microphone Button */}
                 <div className="flex flex-col items-center mr-4">
                   {practiceMode === 'full-melody' && !isRecording ? (
                     <motion.button
-                      className="w-20 h-20 rounded-full flex items-center justify-center shadow-md bg-red-500 hover:bg-red-600"
+                      className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg"
+                      style={{
+                        background: micPermission === false || countdownActive 
+                          ? 'linear-gradient(45deg, #9CA3AF, #6B7280)'
+                          : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+                        opacity: micPermission === false || countdownActive ? 0.5 : 1
+                      }}
                       onClick={startCountdown}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: micPermission === false || countdownActive ? 1 : 1.1 }}
+                      whileTap={{ scale: micPermission === false || countdownActive ? 1 : 0.95 }}
                       disabled={micPermission === false || countdownActive}
                     >
                       <Mic className="text-white" size={32} />
                     </motion.button>
                   ) : (
                     <motion.button
-                      className={`w-20 h-20 rounded-full flex items-center justify-center shadow-md ${
-                        isRecording ? 'bg-red-600' : 'bg-red-500 hover:bg-red-600'
-                      }`}
+                      className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg"
+                      style={{
+                        background: micPermission === false 
+                          ? 'linear-gradient(45deg, #9CA3AF, #6B7280)'
+                          : isRecording 
+                            ? 'linear-gradient(45deg, #EF4444, #DC2626)'
+                            : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+                        opacity: micPermission === false ? 0.5 : 1
+                      }}
                       onClick={toggleRecording}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: micPermission === false ? 1 : 1.1 }}
+                      whileTap={{ scale: micPermission === false ? 1 : 0.95 }}
                       disabled={micPermission === false}
                     >
                       {isRecording ? (
@@ -1490,23 +1558,29 @@ const SightSingingPage = () => {
                       )}
                     </motion.button>
                   )}
-                  <span className="mt-2 text-gray-600 text-sm whitespace-nowrap">
-                    {countdownActive ? `Starting in ${countdownCount}...` : getRecordButtonText()}
+                  <span className="mt-2 kid-subtitle font-bold text-center">
+                    {countdownActive ? `✨ Starting in ${countdownCount}... ✨` : getRecordButtonText()}
                   </span>
                 </div>
 
                 {/* Voice Visualization */}
                 <div className="flex-1 mx-4">
-                  <div className="bg-gray-100 p-3 rounded-md h-20 flex items-center justify-center">
+                  <div className="bg-white bg-opacity-80 p-4 rounded-2xl border-4 border-pink-200 h-24 flex items-center justify-center shadow-lg">
                     {isRecording ? (
                       <div className="flex items-center h-full gap-1">
                         {waveform.map((value, i) => (
                           <motion.div
                             key={i}
-                            className="w-1.5 bg-indigo-500 rounded-full"
+                            className="w-1.5 rounded-full"
+                            style={{ backgroundColor: '#FF6B9D' }}
                             initial={{ height: 5 }}
                             animate={{
                               height: value * 60,
+                              backgroundColor: [
+                                '#FF6B9D',
+                                '#4ECDC4',
+                                '#FFE66D',
+                              ],
                             }}
                             transition={{
                               duration: 0.2,
@@ -1522,22 +1596,25 @@ const SightSingingPage = () => {
                         {waveform.map((value, i) => (
                           <div
                             key={i}
-                            className="w-1.5 bg-gray-400 rounded-full"
-                            style={{ height: `${value * 60}px` }}
+                            className="w-1.5 rounded-full"
+                            style={{ 
+                              height: `${value * 60}px`,
+                              backgroundColor: '#4ECDC4'
+                            }}
                           />
                         ))}
                       </div>
                     ) : (
-                      <span className="text-gray-400 text-sm">Your recording will appear here</span>
+                      <span className="kid-subtitle font-bold text-gray-600">🎵 Your magical voice waves will appear here! 🎵</span>
                     )}
                   </div>
-                  <div className="mt-2 text-center text-gray-500 text-sm">
-                    {hasRecorded ? 'Your Recording' : 'Ready to record'}
+                  <div className="mt-2 text-center kid-subtitle font-bold">
+                    {hasRecorded ? '🎶 Your Amazing Recording! 🎶' : '✨ Ready to Record! ✨'}
                   </div>
                 </div>
 
                 {/* Score Display */}
-                <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 w-48">
+                <div className="bg-white bg-opacity-90 border-4 border-yellow-300 rounded-2xl shadow-lg p-4 w-48">
                   <AnimatePresence>
                     {hasRecorded && (
                       <motion.div
@@ -1548,64 +1625,75 @@ const SightSingingPage = () => {
                         transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                       >
                         <motion.div
-                          className="text-4xl font-bold text-indigo-600"
+                          className="text-4xl font-bold"
+                          style={{ 
+                            background: 'linear-gradient(45deg, #FF6B9D, #4ECDC4)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text'
+                          }}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.3 }}
                         >
                           {accuracy}%
                         </motion.div>
-                        <div className="text-sm text-gray-500">Accuracy</div>
+                        <div className="kid-subtitle font-bold">🎯 Accuracy! 🎯</div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                   {!hasRecorded && (
                     <div className="h-16 flex items-center justify-center">
-                      <span className="text-gray-400 text-sm">Record to see your score</span>
+                      <span className="kid-subtitle font-bold text-center">🎤 Record to see your magical score! ✨</span>
                     </div>
                   )}
                 </div>
               </div>
 
               {/* Detected Note and Feedback */}
-              <div className="mt-4 flex flex-col sm:flex-row justify-between">
-                <div className="bg-gray-50 p-3 rounded-md text-center sm:w-1/3 mb-3 sm:mb-0">
-                  <h4 className="text-sm font-medium text-gray-700 mb-1">Detected Note</h4>
-                  <div className="text-xl font-semibold text-indigo-600">{detectedNote}</div>
+              <div className="mt-4 flex flex-col sm:flex-row justify-between gap-4" style={{ position: 'relative', zIndex: 2 }}>
+                <div className="bg-white bg-opacity-80 p-4 rounded-2xl border-4 border-teal-200 text-center sm:w-1/3 shadow-lg">
+                  <h4 className="activity-title text-lg mb-2">🎵 Note Detected! 🎵</h4>
+                  <div className="text-2xl font-bold kid-subtitle" style={{ color: '#4ECDC4' }}>{detectedNote || '---'}</div>
                   {detectedPitch && (
-                    <div className="text-xs text-gray-500">{detectedPitch.toFixed(1)} Hz</div>
+                    <div className="kid-subtitle text-sm text-gray-600">{detectedPitch.toFixed(1)} Hz</div>
                   )}
                 </div>
 
-                <div className="bg-gray-50 p-3 rounded-md flex-1 text-center">
-                  <h4 className="text-sm font-medium text-gray-700 mb-1">Feedback</h4>
-                  <div className="text-indigo-600">
+                <div className="bg-white bg-opacity-80 p-4 rounded-2xl border-4 border-purple-200 flex-1 text-center shadow-lg">
+                  <h4 className="activity-title text-lg mb-2">💭 Feedback! 💭</h4>
+                  <div className="kid-subtitle font-bold" style={{ color: '#9966CC' }}>
                     {feedback ||
                       (isRecording
                         ? practiceMode === 'note-by-note'
-                          ? `Sing the highlighted note: ${filteredExercises[currentExercise]?.notes[currentNoteIndex]}`
-                          : 'Sing the entire melody'
-                        : 'Press Record to start singing')}
+                          ? `🎶 Sing the highlighted note: ${filteredExercises[currentExercise]?.notes[currentNoteIndex]} 🎶`
+                          : '🎵 Sing the entire melody! You can do it! 🎵'
+                        : '🎤 Press Record to start your musical adventure! ✨')}
                   </div>
                 </div>
               </div>
 
               {/* Achievement Status */}
               {perfectPitchUnlocked && (
-                <div className="mt-4 bg-yellow-50 p-3 rounded-md flex items-center">
-                  <div className="bg-yellow-100 p-2 rounded-full mr-3">
-                    <Award size={20} className="text-yellow-600" />
+                <motion.div 
+                  className="mt-4 bg-gradient-to-r from-yellow-100 to-yellow-200 p-4 rounded-2xl border-4 border-yellow-400 flex items-center shadow-lg"
+                  style={{ position: 'relative', zIndex: 2 }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                >
+                  <div className="bg-yellow-300 p-3 rounded-full mr-4 border-2 border-yellow-500">
+                    <Award size={24} className="text-yellow-700" />
                   </div>
                   <div>
-                    <h4 className="font-medium text-yellow-800">
-                      Achievement Unlocked: Perfect Pitch
+                    <h4 className="activity-title text-lg text-yellow-800">
+                      🏆 Achievement Unlocked: Perfect Pitch! 🏆
                     </h4>
-                    <p className="text-sm text-yellow-700">
-                      You've earned the Perfect Pitch achievement by scoring 100% on a sight singing
-                      exercise!
+                    <p className="kid-subtitle font-bold text-yellow-700">
+                      ✨ Amazing! You scored 100% on a sight singing exercise! You're a true musical star! 🌟
                     </p>
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {/* Melody Results Table (only in full-melody mode when results are available) */}
@@ -1661,59 +1749,71 @@ const SightSingingPage = () => {
 
               {/* Microphone Permission Error */}
               {micPermission === false && (
-                <div className="mt-4 bg-red-50 text-red-600 p-4 rounded-md">
-                  <p className="font-medium">Microphone access denied</p>
-                  <p className="text-sm">
-                    Please allow microphone access in your browser settings to use this feature.
+                <div className="mt-4 bg-red-100 p-4 rounded-2xl border-4 border-red-300 shadow-lg" style={{ position: 'relative', zIndex: 2 }}>
+                  <p className="activity-title text-lg text-red-700">😅 Microphone Access Needed! 😅</p>
+                  <p className="kid-subtitle font-bold text-red-600">
+                    🎤 Please allow microphone access in your browser so we can hear your beautiful voice! ✨
                   </p>
                 </div>
               )}
             </motion.div>
 
             {/* Exercise Selection and Navigation */}
-            <motion.div className="mt-6 bg-white rounded-lg shadow-sm p-6" variants={itemVariants}>
-              <h3 className="font-semibold text-gray-700 mb-3">Select Exercise:</h3>
+            <motion.div className="kid-welcome-section" variants={itemVariants}>
+              <h3 className="activity-title text-2xl mb-6 text-center" style={{ position: 'relative', zIndex: 2 }}>🎯 Choose Your Song! 🎯</h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6" style={{ position: 'relative', zIndex: 2 }}>
                 {filteredExercises.map((exercise, index) => (
                   <motion.button
                     key={index}
-                    className={`p-3 rounded-md text-left ${
+                    className={`kid-card text-left ${
                       currentExercise === index
-                        ? 'bg-indigo-100 text-indigo-700 border border-indigo-300'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                        ? 'ring-4 ring-yellow-400 bg-yellow-50'
+                        : ''
                     }`}
-                    whileHover={{ scale: 1.02 }}
+                    style={{
+                      background: currentExercise === index 
+                        ? 'linear-gradient(45deg, rgba(255, 230, 109, 0.3), rgba(255, 255, 255, 0.9))'
+                        : 'rgba(255, 255, 255, 0.9)',
+                      padding: '1rem'
+                    }}
+                    whileHover={{ y: -5, scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleExerciseChange(index)}
                   >
-                    <div className="font-medium">{exercise.name}</div>
-                    <div className="text-xs mt-1 text-gray-500">
-                      {exercise.exerciseType} · {exercise.difficulty}
+                    <div className="activity-title text-base">{exercise.name}</div>
+                    <div className="kid-subtitle text-sm mt-1">
+                      🎵 {exercise.exerciseType} • {exercise.difficulty} 🎵
                     </div>
                   </motion.button>
                 ))}
               </div>
 
               {filteredExercises.length === 0 && (
-                <div className="text-center p-8 text-gray-500">
-                  No exercises available for the selected criteria. Try changing the difficulty or
-                  exercise type.
+                <div className="text-center p-8" style={{ position: 'relative', zIndex: 2 }}>
+                  <p className="kid-subtitle font-bold text-red-600">
+                    😅 No musical adventures available for your current settings! Try changing the difficulty or song type! 🎯
+                  </p>
                 </div>
               )}
 
               {/* Navigation Button */}
-              <div className="flex justify-end">
+              <div className="flex justify-end" style={{ position: 'relative', zIndex: 2 }}>
                 <motion.button
-                  className={`bg-indigo-600 text-white py-2 px-6 rounded-lg flex items-center font-medium ${
+                  className={`kid-button ${
                     !hasRecorded ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  whileHover={{ backgroundColor: '#4338ca' }}
-                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    background: hasRecorded 
+                      ? 'linear-gradient(45deg, #FF6B9D, #FFE66D)' 
+                      : 'linear-gradient(45deg, #9CA3AF, #6B7280)'
+                  }}
+                  whileHover={{ scale: hasRecorded ? 1.1 : 1 }}
+                  whileTap={{ scale: hasRecorded ? 0.95 : 1 }}
                   onClick={handleNextExercise}
                   disabled={!hasRecorded}
                 >
-                  Next Exercise
+                  🚀 Next Adventure!
                   <ChevronRight size={16} className="ml-1" />
                 </motion.button>
               </div>
