@@ -251,6 +251,11 @@ input, button, textarea, select {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: max-content;
 }
 
 .kid-button::before {

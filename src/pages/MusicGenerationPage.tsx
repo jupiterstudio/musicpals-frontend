@@ -13,7 +13,9 @@ import {
   Award,
 } from 'lucide-react';
 import Layout from '../components/Layout';
-import { exerciseAPI, progressAPI, achievementAPI } from '../services/api';
+import { exerciseAPI, progressAPI, achievementAPI, musicGenerationAPI } from '../services/api';
+import { useEnhancedProgress, useExerciseSession } from '../hooks/useEnhancedProgress';
+import { SuccessModal, ErrorModal } from '../components/Modal';
 
 // Import Magenta and music-related libraries
 // Note: These imports might need adjustment based on your actual setup
@@ -153,8 +155,62 @@ const MusicGenerationPage = () => {
   const [melodyMakerUnlocked, setMelodyMakerUnlocked] = useState(false);
   const [showAchievementNotification, setShowAchievementNotification] = useState(false);
 
+  // Modal state
+  const [successModal, setSuccessModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    icon?: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    icon: '🎉',
+  });
+
+  const [errorModal, setErrorModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+  });
+
   // Reference for animation frame
   const playbackRef = useRef<number | null>(null);
+
+  // Enhanced progress tracking
+  const {
+    isLoading: progressLoading,
+    error: progressError,
+    getAdaptiveDifficultyRecommendation,
+    getLearningInsights,
+    getPersonalizedRecommendations,
+  } = useEnhancedProgress();
+
+  const {
+    isSessionActive,
+    startSession,
+    recordMistake,
+    recordHintUsed,
+    completeSession,
+    getNextDifficulty,
+    getSessionStats,
+  } = useExerciseSession('MusicGeneration', 'composition');
+
+  // AI Generation State
+  const [aiGenerationOptions, setAiGenerationOptions] = useState({
+    genre: 'pop',
+    mood: 'happy',
+    tempo: 120,
+    complexity: 'beginner' as 'beginner' | 'intermediate' | 'advanced',
+    duration: 8,
+  });
+  const [showAiOptions, setShowAiOptions] = useState(false);
+  const [aiSuggestions, setAiSuggestions] = useState<any>(null);
+  const [sessionStarted, setSessionStarted] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -171,6 +227,32 @@ const MusicGenerationPage = () => {
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
+  };
+
+  // Modal helper functions
+  const showSuccessModal = (title: string, message: string, icon: string = '🎉') => {
+    setSuccessModal({
+      isOpen: true,
+      title,
+      message,
+      icon,
+    });
+  };
+
+  const showErrorModal = (title: string, message: string) => {
+    setErrorModal({
+      isOpen: true,
+      title,
+      message,
+    });
+  };
+
+  const closeSuccessModal = () => {
+    setSuccessModal(prev => ({ ...prev, isOpen: false }));
+  };
+
+  const closeErrorModal = () => {
+    setErrorModal(prev => ({ ...prev, isOpen: false }));
   };
 
   // Fetch user data and achievements
@@ -197,7 +279,7 @@ const MusicGenerationPage = () => {
 
         if (musicGenerationProgress) {
           setUserProgress(musicGenerationProgress);
-          setMelodiesSaved(musicGenerationProgress.exercises.length);
+          setMelodiesSaved(musicGenerationProgress.exercises?.length || 0);
         }
 
         // In a real app, you might fetch saved melodies from a dedicated API endpoint
@@ -221,7 +303,26 @@ const MusicGenerationPage = () => {
     };
 
     fetchUserData();
+    loadAiSuggestions();
   }, []);
+
+  // Load AI suggestions and recommendations
+  const loadAiSuggestions = async () => {
+    try {
+      const suggestions = await musicGenerationAPI.getPersonalizedSuggestions();
+      setAiSuggestions(suggestions.data.data);
+
+      // Update AI generation options based on suggestions
+      if (suggestions.data.data?.nextComplexityLevel) {
+        setAiGenerationOptions(prev => ({
+          ...prev,
+          complexity: suggestions.data.data.nextComplexityLevel,
+        }));
+      }
+    } catch (error) {
+      console.error('Error loading AI suggestions:', error);
+    }
+  };
 
   // Load the MusicVAE model and player when component mounts
   useEffect(() => {
@@ -348,8 +449,81 @@ const MusicGenerationPage = () => {
     return notes;
   };
 
-  // Generate and play a new melody
+  // Generate melody using AI service
+  const generateWithAI = async () => {
+    setIsGenerating(true);
+    setCurrentPlayingSample(null);
+
+    try {
+      // Start session tracking
+      if (!sessionStarted) {
+        // Map complexity to valid difficulty enum values and use valid exercise type
+        const difficultyMap = {
+          beginner: 'Easy',
+          intermediate: 'Medium',
+          advanced: 'Hard',
+        };
+        startSession(
+          'melody_composition',
+          difficultyMap[aiGenerationOptions.complexity] || 'Medium'
+        );
+        setSessionStarted(true);
+      }
+
+      // Get user progress for personalized generation
+      const userProgress = await getLearningInsights(30);
+
+      // Call AI generation service
+      const response = await musicGenerationAPI.generateMelody({
+        ...aiGenerationOptions,
+        userProgress,
+      });
+
+      if (response.data?.data?.notes) {
+        const notes = response.data.data.notes.map((note: any) => ({
+          pitch: note.pitch,
+          startTime: note.startTime,
+          endTime: note.endTime,
+          velocity: note.velocity,
+          quantizedStartStep: note.quantizedStartStep,
+          quantizedEndStep: note.quantizedEndStep,
+        }));
+
+        setGeneratedNotes(notes);
+
+        // Play the generated melody
+        setTimeout(() => {
+          playCurrent(notes);
+        }, 100);
+
+        // Check for achievements
+        await checkAchievements();
+
+        showSuccessModal(
+          'AI Melody Generated!',
+          `Successfully created a ${response.data.data.metadata?.genre} melody in ${response.data.data.metadata?.keySignature}! 🎵`,
+          '🤖'
+        );
+      } else {
+        throw new Error('No notes received from AI service');
+      }
+    } catch (error) {
+      console.error('Error generating AI music:', error);
+
+      // Fallback to algorithmic generation
+      await generateAndPlay();
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Generate and play a new melody (enhanced version)
   const generateAndPlay = async () => {
+    // Use AI generation if options are set, otherwise use Magenta
+    if (showAiOptions) {
+      return generateWithAI();
+    }
+
     if (!model || !player) {
       console.error('Model or player not loaded');
 
@@ -362,6 +536,12 @@ const MusicGenerationPage = () => {
     setCurrentPlayingSample(null);
 
     try {
+      // Start session tracking
+      if (!sessionStarted) {
+        startSession('melody_composition', 'Medium');
+        setSessionStarted(true);
+      }
+
       // Generate one new melody
       const samples = await model.sample(1);
       const generatedSequence = samples[0];
@@ -394,26 +574,8 @@ const MusicGenerationPage = () => {
 
       checkPlaybackStatus();
 
-      // Check for Melody Maker achievement if this is the first generation
-      if (!melodyMakerUnlocked) {
-        try {
-          await achievementAPI.unlockAchievement(
-            'Melody Maker',
-            'Generate your first original melody',
-            'music'
-          );
-
-          setMelodyMakerUnlocked(true);
-          setShowAchievementNotification(true);
-
-          // Hide notification after 5 seconds
-          setTimeout(() => {
-            setShowAchievementNotification(false);
-          }, 5000);
-        } catch (err) {
-          console.error('Error unlocking achievement:', err);
-        }
-      }
+      // Check for achievements
+      await checkAchievements();
     } catch (error) {
       console.error('Error generating music:', error);
 
@@ -426,10 +588,33 @@ const MusicGenerationPage = () => {
     }
   };
 
+  // Check and unlock achievements
+  const checkAchievements = async () => {
+    if (!melodyMakerUnlocked) {
+      try {
+        await achievementAPI.unlockAchievement(
+          'Melody Maker',
+          'Generate your first original melody',
+          'music'
+        );
+
+        setMelodyMakerUnlocked(true);
+        setShowAchievementNotification(true);
+
+        // Hide notification after 5 seconds
+        setTimeout(() => {
+          setShowAchievementNotification(false);
+        }, 5000);
+      } catch (err) {
+        console.error('Error unlocking achievement:', err);
+      }
+    }
+  };
+
   // Save the current melody
   const handleSaveMelody = async () => {
     if (generatedNotes.length === 0) {
-      alert('No melody to save! Generate a melody first.');
+      showErrorModal('No Melody Found', 'Please generate a melody first before saving! 🎵');
       return;
     }
 
@@ -439,29 +624,62 @@ const MusicGenerationPage = () => {
   // Confirm saving the melody
   const confirmSaveMelody = async () => {
     if (!saveMelodyName.trim()) {
-      alert('Please enter a name for your melody');
+      showErrorModal('Name Required', 'Please enter a name for your melody before saving! ✏️');
       return;
     }
 
     setIsSaving(true);
 
     try {
-      // Record exercise completion as a way to track saved melodies
+      // Use AI music service to save melody
+      const melodyData = {
+        name: saveMelodyName,
+        notes: generatedNotes,
+        metadata: {
+          genre: aiGenerationOptions.genre,
+          mood: aiGenerationOptions.mood,
+          tempo: aiGenerationOptions.tempo,
+          duration: Math.max(...generatedNotes.map(n => n.endTime)),
+          complexity: aiGenerationOptions.complexity,
+        },
+        isAiGenerated: showAiOptions,
+      };
+
+      // Save to AI service
+      await musicGenerationAPI.saveMelody(melodyData);
+
+      // Also record as exercise completion for progress tracking
+      const difficultyMap = {
+        beginner: 'Easy',
+        intermediate: 'Medium',
+        advanced: 'Hard',
+      };
       await exerciseAPI.recordExerciseCompletion(
         'MusicGeneration',
-        Date.now().toString(), // Use timestamp as ID
+        Date.now().toString(),
         saveMelodyName,
         100, // Perfect score for saving
-        'Medium'
+        difficultyMap[aiGenerationOptions.complexity] || 'Medium'
       );
+
+      // Complete session with high score
+      if (sessionStarted) {
+        await completeSession(95); // High score for successful creation
+        setSessionStarted(false);
+      }
 
       // Update progress for the Music Generation module
       const newMelodiesSaved = melodiesSaved + 1;
       setMelodiesSaved(newMelodiesSaved);
 
-      // Calculate new progress percentage
-      // In a real app, this could be more sophisticated
-      const newProgress = Math.min(100, Math.floor(newMelodiesSaved * 10)); // 10% per melody, up to 100%
+      // Calculate new progress percentage based on complexity
+      const complexityMultiplier = {
+        beginner: 5,
+        intermediate: 8,
+        advanced: 12,
+      };
+      const progressIncrease = complexityMultiplier[aiGenerationOptions.complexity];
+      const newProgress = Math.min(100, Math.floor(newMelodiesSaved * progressIncrease));
 
       await progressAPI.updateProgress('MusicGeneration', newProgress);
 
@@ -475,15 +693,30 @@ const MusicGenerationPage = () => {
 
       setSavedMelodies([newSavedMelody, ...savedMelodies]);
 
-      // Success message
-      alert(`"${saveMelodyName}" saved successfully!`);
+      // Success message with AI insights
+      if (showAiOptions) {
+        try {
+          const analysis = await musicGenerationAPI.analyzeMelody(generatedNotes);
+          showSuccessModal(
+            'Melody Saved!',
+            `"${saveMelodyName}" saved successfully!\n🎼 Analysis: ${
+              analysis.data.data.dominantScale
+            } with ${analysis.data.data.rhythmicComplexity > 0.5 ? 'complex' : 'simple'} rhythm`,
+            '💾'
+          );
+        } catch {
+          showSuccessModal('Melody Saved!', `"${saveMelodyName}" saved successfully!`, '💾');
+        }
+      } else {
+        showSuccessModal('Melody Saved!', `"${saveMelodyName}" saved successfully!`, '💾');
+      }
 
       // Reset dialog
       setShowSaveDialog(false);
       setSaveMelodyName('');
     } catch (err) {
       console.error('Error saving melody:', err);
-      alert('Failed to save melody. Please try again.');
+      showErrorModal('Save Failed', 'Failed to save melody. Please try again! 🔄');
     } finally {
       setIsSaving(false);
     }
@@ -716,7 +949,7 @@ const MusicGenerationPage = () => {
         <div className="note">🥁</div>
         <div className="note">🎤</div>
       </div>
-      
+
       <motion.main
         className="py-8 px-4"
         style={{
@@ -750,7 +983,7 @@ const MusicGenerationPage = () => {
               className="fixed top-4 right-4 bg-yellow-50 border border-yellow-300 shadow-md rounded-lg p-4 z-50 flex items-center"
               style={{
                 maxWidth: '400px',
-                minWidth: '320px'
+                minWidth: '320px',
               }}
               initial={{ opacity: 0, y: -50 }}
               animate={{ opacity: 1, y: 0 }}
@@ -759,7 +992,9 @@ const MusicGenerationPage = () => {
               <Award className="text-yellow-500 mr-3" size={24} />
               <div>
                 <h4 className="activity-title text-yellow-800">Achievement Unlocked! 🎉</h4>
-                <p className="kid-subtitle font-bold text-yellow-700">You're now a Melody Maker! 🎵✨</p>
+                <p className="kid-subtitle font-bold text-yellow-700">
+                  You're now a Melody Maker! 🎵✨
+                </p>
               </div>
             </motion.div>
           )}
@@ -767,18 +1002,177 @@ const MusicGenerationPage = () => {
 
         {/* Generation Controls */}
         <motion.div className="mt-6 kid-welcome-section" variants={itemVariants}>
-          <h3 className="activity-title text-center mb-6" style={{ position: 'relative', zIndex: 2 }}>🎵 Create Your Musical Melody! ✨</h3>
-          <div className="flex flex-wrap justify-center items-center gap-4" style={{ position: 'relative', zIndex: 2 }}>
+          <h3
+            className="activity-title text-center mb-6"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
+            🎵 Create Your Musical Melody! ✨
+          </h3>
+
+          {/* AI Options Toggle */}
+          <div className="text-center mb-4" style={{ position: 'relative', zIndex: 2 }}>
+            <motion.button
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-purple-300 bg-white hover:bg-purple-50"
+              onClick={() => setShowAiOptions(!showAiOptions)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              🤖 {showAiOptions ? 'Hide' : 'Show'} AI Options
+            </motion.button>
+          </div>
+
+          {/* AI Generation Options */}
+          <AnimatePresence>
+            {showAiOptions && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-6 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl border-4 border-purple-200"
+                style={{ position: 'relative', zIndex: 2 }}
+              >
+                <h4 className="font-bold text-purple-800 mb-4 text-center">
+                  🎼 AI Music Generation Settings
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-bold text-purple-700 mb-2">🎭 Genre</label>
+                    <select
+                      value={aiGenerationOptions.genre}
+                      onChange={e =>
+                        setAiGenerationOptions({ ...aiGenerationOptions, genre: e.target.value })
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      <option value="pop">Pop</option>
+                      <option value="classical">Classical</option>
+                      <option value="jazz">Jazz</option>
+                      <option value="folk">Folk</option>
+                      <option value="blues">Blues</option>
+                      <option value="country">Country</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-purple-700 mb-2">😊 Mood</label>
+                    <select
+                      value={aiGenerationOptions.mood}
+                      onChange={e =>
+                        setAiGenerationOptions({ ...aiGenerationOptions, mood: e.target.value })
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      <option value="happy">Happy</option>
+                      <option value="peaceful">Peaceful</option>
+                      <option value="energetic">Energetic</option>
+                      <option value="mysterious">Mysterious</option>
+                      <option value="romantic">Romantic</option>
+                      <option value="adventurous">Adventurous</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-purple-700 mb-2">
+                      🎯 Complexity
+                    </label>
+                    <select
+                      value={aiGenerationOptions.complexity}
+                      onChange={e =>
+                        setAiGenerationOptions({
+                          ...aiGenerationOptions,
+                          complexity: e.target.value as any,
+                        })
+                      }
+                      className="w-full p-2 border rounded-lg"
+                    >
+                      <option value="beginner">Beginner</option>
+                      <option value="intermediate">Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-bold text-purple-700 mb-2">
+                      🥁 Tempo: {aiGenerationOptions.tempo} BPM
+                    </label>
+                    <input
+                      type="range"
+                      min="60"
+                      max="180"
+                      value={aiGenerationOptions.tempo}
+                      onChange={e =>
+                        setAiGenerationOptions({
+                          ...aiGenerationOptions,
+                          tempo: parseInt(e.target.value),
+                        })
+                      }
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-purple-700 mb-2">
+                      ⏱️ Duration: {aiGenerationOptions.duration}s
+                    </label>
+                    <input
+                      type="range"
+                      min="4"
+                      max="16"
+                      value={aiGenerationOptions.duration}
+                      onChange={e =>
+                        setAiGenerationOptions({
+                          ...aiGenerationOptions,
+                          duration: parseInt(e.target.value),
+                        })
+                      }
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                {/* AI Suggestions */}
+                {aiSuggestions && (
+                  <div className="mt-4 p-3 bg-white bg-opacity-80 rounded-xl">
+                    <h5 className="font-bold text-purple-800 mb-2">🎯 AI Recommendations</h5>
+                    <div className="text-sm text-purple-700">
+                      <p>
+                        <strong>Recommended Genres:</strong>{' '}
+                        {aiSuggestions.recommendedGenres?.join(', ')}
+                      </p>
+                      <p>
+                        <strong>Suggested Complexity:</strong> {aiSuggestions.nextComplexityLevel}
+                      </p>
+                      {aiSuggestions.inspirationPrompts && (
+                        <p>
+                          <strong>Inspiration:</strong> {aiSuggestions.inspirationPrompts[0]}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div
+            className="flex flex-wrap justify-center items-center gap-4"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
             <motion.button
               className="kid-button"
               style={{
-                background: isGenerating 
+                background: isGenerating
                   ? 'linear-gradient(45deg, #9CA3AF, #6B7280)'
+                  : showAiOptions
+                  ? 'linear-gradient(45deg, #8B5CF6, #A855F7)'
                   : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
-                opacity: isGenerating || !model ? 0.5 : 1
+                opacity: isGenerating ? 0.5 : 1,
               }}
               onClick={generateAndPlay}
-              disabled={isGenerating || !model}
+              disabled={isGenerating}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -806,19 +1200,19 @@ const MusicGenerationPage = () => {
                   </svg>
                   ✨ Creating Magic...
                 </>
+              ) : showAiOptions ? (
+                <>🤖 Generate with AI!</>
               ) : (
-                <>
-                  🎵 Generate New Melody!
-                </>
+                <>🎵 Generate New Melody!</>
               )}
             </motion.button>
-            
+
             {/* Save Button */}
             <motion.button
               className="kid-button"
               style={{
                 background: 'linear-gradient(45deg, #4ECDC4, #95E1D3)',
-                opacity: generatedNotes.length === 0 || isGenerating ? 0.5 : 1
+                opacity: generatedNotes.length === 0 || isGenerating ? 0.5 : 1,
               }}
               onClick={handleSaveMelody}
               disabled={generatedNotes.length === 0 || isGenerating}
@@ -828,7 +1222,42 @@ const MusicGenerationPage = () => {
               💾 Save My Creation!
             </motion.button>
           </div>
-          
+
+          {/* Session Statistics */}
+          {sessionStarted && (
+            <div
+              className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4"
+              style={{ position: 'relative', zIndex: 2 }}
+            >
+              <div className="bg-gradient-to-r from-blue-100 to-indigo-100 p-3 rounded-2xl border-4 border-blue-200">
+                <div className="text-center">
+                  <div className="font-bold text-blue-800 text-sm">Active Session</div>
+                  <div className="text-lg font-bold text-blue-600">
+                    {showAiOptions ? '🤖 AI Mode' : '🎵 Creative Mode'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-green-100 to-emerald-100 p-3 rounded-2xl border-4 border-green-200">
+                <div className="text-center">
+                  <div className="font-bold text-green-800 text-sm">Complexity</div>
+                  <div className="text-lg font-bold text-green-600 capitalize">
+                    {aiGenerationOptions.complexity}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-3 rounded-2xl border-4 border-purple-200">
+                <div className="text-center">
+                  <div className="font-bold text-purple-800 text-sm">Session Score</div>
+                  <div className="text-lg font-bold text-purple-600">
+                    {Math.max(0, 100 - (getSessionStats()?.mistakesMade || 0) * 10)}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Melodies Saved Counter */}
           <div className="mt-6 text-center" style={{ position: 'relative', zIndex: 2 }}>
             <div className="inline-flex items-center gap-2 bg-white bg-opacity-80 rounded-full px-6 py-3 shadow-lg">
@@ -839,14 +1268,20 @@ const MusicGenerationPage = () => {
               <span className="text-2xl">🎉</span>
             </div>
           </div>
-          
+
           {loadingMessage && (
-            <div className="mt-4 text-center text-yellow-600 font-bold" style={{ position: 'relative', zIndex: 2 }}>
+            <div
+              className="mt-4 text-center text-yellow-600 font-bold"
+              style={{ position: 'relative', zIndex: 2 }}
+            >
               {loadingMessage} 🎼
             </div>
           )}
           {error && (
-            <div className="mt-4 text-center text-red-600 font-bold" style={{ position: 'relative', zIndex: 2 }}>
+            <div
+              className="mt-4 text-center text-red-600 font-bold"
+              style={{ position: 'relative', zIndex: 2 }}
+            >
               {error} 😅
             </div>
           )}
@@ -854,7 +1289,10 @@ const MusicGenerationPage = () => {
 
         {/* Piano Roll Display */}
         <motion.div className="mt-6 kid-welcome-section" variants={itemVariants}>
-          <div className="flex justify-between items-center mb-4" style={{ position: 'relative', zIndex: 2 }}>
+          <div
+            className="flex justify-between items-center mb-4"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
             <h3 className="activity-title text-xl">🎼 Your Musical Creation!</h3>
             <div className="flex items-center space-x-2">
               {/* View Controls */}
@@ -886,22 +1324,30 @@ const MusicGenerationPage = () => {
                 onClick={togglePlayback}
                 className="kid-button"
                 style={{
-                  background: isPlaying 
+                  background: isPlaying
                     ? 'linear-gradient(45deg, #ef4444, #f87171)'
                     : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
-                  opacity: generatedNotes.length === 0 ? 0.5 : 1
+                  opacity: generatedNotes.length === 0 ? 0.5 : 1,
                 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 disabled={generatedNotes.length === 0}
               >
-                {isPlaying ? '⏸️ Stop Music' : '▶️ Play My Song!'}
+                {isPlaying ? (
+                  <Pause size={24} className="mr-1" />
+                ) : (
+                  <Play size={24} className="mr-1" />
+                )}
+                {isPlaying ? 'Stop Music' : 'Play My Song!'}
               </motion.button>
             </div>
           </div>
 
           {/* Piano Roll */}
-          <div className="piano-roll-container relative border border-gray-200 rounded-md overflow-hidden" style={{ position: 'relative', zIndex: 2 }}>
+          <div
+            className="piano-roll-container relative border border-gray-200 rounded-md overflow-hidden"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
             <div className="flex">
               {/* Piano Keys */}
               <div className="piano-keys w-12 border-r border-gray-200 bg-white">
@@ -1014,19 +1460,26 @@ const MusicGenerationPage = () => {
           </div>
 
           {/* Note Count Indicator */}
-          <div className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-md" style={{ position: 'relative', zIndex: 2 }}>
+          <div
+            className="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-md"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
             <div className="flex justify-between items-center text-sm">
               <div>
                 {generatedNotes.length > 0 ? (
                   <>
-                    <span className="kid-subtitle font-bold">🎵 Notes:</span> {generatedNotes.length} |
+                    <span className="kid-subtitle font-bold">🎵 Notes:</span>{' '}
+                    {generatedNotes.length} |
                     <span className="kid-subtitle font-bold ml-2">🎹 Range:</span>{' '}
                     {getNoteNameFromPitch(Math.min(...generatedNotes.map(n => n.pitch)))} to{' '}
                     {getNoteNameFromPitch(Math.max(...generatedNotes.map(n => n.pitch)))} |
-                    <span className="kid-subtitle font-bold ml-2">⏱️ Duration:</span> {sequenceDuration.toFixed(1)}s
+                    <span className="kid-subtitle font-bold ml-2">⏱️ Duration:</span>{' '}
+                    {sequenceDuration.toFixed(1)}s
                   </>
                 ) : (
-                  <span className="kid-subtitle font-bold">🌟 Generate a melody to see the magic!</span>
+                  <span className="kid-subtitle font-bold">
+                    🌟 Generate a melody to see the magic!
+                  </span>
                 )}
               </div>
               <div>
@@ -1036,15 +1489,19 @@ const MusicGenerationPage = () => {
               </div>
             </div>
           </div>
-
         </motion.div>
 
         {/* Saved Melodies Section (if available) */}
         {savedMelodies.length > 0 && (
           <motion.div className="mt-6 kid-welcome-section" variants={itemVariants}>
-            <h3 className="activity-title text-xl mb-4" style={{ position: 'relative', zIndex: 2 }}>🏆 Your Saved Melodies</h3>
+            <h3 className="activity-title text-xl mb-4" style={{ position: 'relative', zIndex: 2 }}>
+              🏆 Your Saved Melodies
+            </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" style={{ position: 'relative', zIndex: 2 }}>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+              style={{ position: 'relative', zIndex: 2 }}
+            >
               {savedMelodies.map(melody => (
                 <motion.div
                   key={melody.id}
@@ -1076,19 +1533,22 @@ const MusicGenerationPage = () => {
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <span className="kid-subtitle text-sm font-bold">{formatDate(melody.dateCreated)}</span>
+                    <span className="kid-subtitle text-sm font-bold">
+                      {formatDate(melody.dateCreated)}
+                    </span>
 
                     {/* Play button */}
                     <motion.button
                       className="kid-button text-sm px-4 py-2"
                       style={{
-                        background: 'linear-gradient(45deg, #4ECDC4, #95E1D3)'
+                        background: 'linear-gradient(45deg, #4ECDC4, #95E1D3)',
                       }}
                       onClick={() => playSavedMelody(melody)}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                     >
-                      ▶️ Play
+                      <Play size={24} className="mr-1" />
+                      Play
                     </motion.button>
                   </div>
                 </motion.div>
@@ -1099,9 +1559,14 @@ const MusicGenerationPage = () => {
 
         {/* Sample Melodies Section */}
         <motion.div className="mt-6 kid-welcome-section" variants={itemVariants}>
-          <h3 className="activity-title text-xl mb-4" style={{ position: 'relative', zIndex: 2 }}>🎵 Sample Melodies</h3>
+          <h3 className="activity-title text-xl mb-4" style={{ position: 'relative', zIndex: 2 }}>
+            🎵 Sample Melodies
+          </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" style={{ position: 'relative', zIndex: 2 }}>
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
             {sampleMelodies.map(sample => (
               <motion.div
                 key={sample.id}
@@ -1157,18 +1622,25 @@ const MusicGenerationPage = () => {
                 <motion.button
                   className="kid-button text-sm px-4 py-2"
                   style={{
-                    background: currentPlayingSample === sample.id && isPlaying
-                      ? 'linear-gradient(45deg, #ef4444, #f87171)'
-                      : 'linear-gradient(45deg, #FF6B9D, #4ECDC4)'
+                    background:
+                      currentPlayingSample === sample.id && isPlaying
+                        ? 'linear-gradient(45deg, #ef4444, #f87171)'
+                        : 'linear-gradient(45deg, #FF6B9D, #4ECDC4)',
                   }}
                   onClick={() => playSampleMelody(sample.id)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                 >
                   {currentPlayingSample === sample.id && isPlaying ? (
-                    <>⏸️ Stop</>
+                    <>
+                      <Pause size={24} className="mr-1" />
+                      Stop
+                    </>
                   ) : (
-                    <>▶️ Play</>
+                    <>
+                      <Play size={24} className="mr-1" />
+                      Play
+                    </>
                   )}
                 </motion.button>
               </motion.div>
@@ -1246,6 +1718,22 @@ const MusicGenerationPage = () => {
           </div>
         )}
       </motion.main>
+
+      {/* Modals */}
+      <SuccessModal
+        isOpen={successModal.isOpen}
+        onClose={closeSuccessModal}
+        title={successModal.title}
+        message={successModal.message}
+        icon={successModal.icon}
+      />
+
+      <ErrorModal
+        isOpen={errorModal.isOpen}
+        onClose={closeErrorModal}
+        title={errorModal.title}
+        message={errorModal.message}
+      />
     </Layout>
   );
 };

@@ -1,9 +1,90 @@
-// src/pages/LessonsPage.tsx
-import { useState, useEffect } from 'react';
+// src/pages/LessonsPage.tsx - Enhanced with Adaptive Learning
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, BookOpen, Play } from 'lucide-react';
+import {
+  ChevronRight,
+  BookOpen,
+  Play,
+  Brain,
+  Target,
+  TrendingUp,
+  Lightbulb,
+  Award,
+  Clock,
+  CheckCircle,
+  Music4,
+  Bot,
+} from 'lucide-react';
 import Layout from '../components/Layout';
 import { progressAPI, exerciseAPI, achievementAPI } from '../services/api';
+import { useEnhancedProgress, useExerciseSession } from '../hooks/useEnhancedProgress';
+import { EnhancedAudioPlayer } from '../components/EnhancedAudioPlayer';
+import InteractiveMusicTheory from '../components/InteractiveMusicTheory';
+
+// Define interactive quiz questions for each chapter
+const chapterQuizzes = [
+  {
+    chapterId: 0,
+    questions: [
+      {
+        question: 'How many lines does a musical staff have?',
+        options: ['3', '4', '5', '6'],
+        correct: 2,
+        explanation: 'A musical staff has exactly 5 lines and 4 spaces between them.',
+      },
+      {
+        question: 'Which note lasts the longest?',
+        options: ['Quarter note', 'Half note', 'Whole note', 'Eighth note'],
+        correct: 2,
+        explanation: 'A whole note lasts for 4 beats, making it the longest common note value.',
+      },
+      {
+        question: 'What does the treble clef tell us?',
+        options: ['Volume level', 'Note pitches', 'Song tempo', 'Key signature'],
+        correct: 1,
+        explanation:
+          'The treble clef tells us which pitches correspond to each line and space on the staff.',
+      },
+    ],
+  },
+  {
+    chapterId: 1,
+    questions: [
+      {
+        question: 'In 4/4 time, how many quarter note beats are in each measure?',
+        options: ['2', '3', '4', '6'],
+        correct: 2,
+        explanation: '4/4 time means 4 quarter note beats per measure.',
+      },
+      {
+        question: 'What type of music commonly uses 3/4 time?',
+        options: ['Rock music', 'Waltz', 'Hip-hop', 'Blues'],
+        correct: 1,
+        explanation:
+          "Waltzes traditionally use 3/4 time, giving them their characteristic 'ONE-two-three' feel.",
+      },
+    ],
+  },
+  {
+    chapterId: 2,
+    questions: [
+      {
+        question: 'What is the pattern of steps in a major scale?',
+        options: ['W-W-H-W-W-W-H', 'W-H-W-W-H-W-W', 'H-W-W-H-W-W-W', 'W-W-W-H-W-W-H'],
+        correct: 0,
+        explanation:
+          'The major scale follows the pattern: Whole-Whole-Half-Whole-Whole-Whole-Half.',
+      },
+      {
+        question: 'Which scale has no sharps or flats?',
+        options: ['G major', 'F major', 'C major', 'D major'],
+        correct: 2,
+        explanation:
+          'C major scale (C-D-E-F-G-A-B-C) uses only white keys and has no sharps or flats.',
+      },
+    ],
+  },
+];
 
 // Define lesson chapters
 const chapters = [
@@ -158,6 +239,44 @@ const LessonsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [theoryScholarUnlocked, setTheoryScholarUnlocked] = useState(false);
 
+  // Enhanced progress tracking
+  const {
+    isLoading: progressLoading,
+    error: progressError,
+    getAdaptiveDifficultyRecommendation,
+    getLearningInsights,
+    getPersonalizedRecommendations,
+  } = useEnhancedProgress();
+
+  const {
+    isSessionActive,
+    startSession,
+    recordMistake,
+    recordHintUsed,
+    completeSession,
+    getNextDifficulty,
+    getSessionStats,
+  } = useExerciseSession('Lessons', 'theory');
+
+  // New state for adaptive learning
+  const [adaptiveRecommendation, setAdaptiveRecommendation] = useState<any>(null);
+  const [learningInsights, setLearningInsights] = useState<any>(null);
+  const [personalizedRecommendations, setPersonalizedRecommendations] = useState<any>(null);
+  const [showAdaptiveHint, setShowAdaptiveHint] = useState(false);
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [studyTime, setStudyTime] = useState(0);
+  const [comprehensionScore, setComprehensionScore] = useState(0);
+  const [interactiveMode, setInteractiveMode] = useState(false);
+  const [quizMode, setQuizMode] = useState(false);
+  const [currentQuiz, setCurrentQuiz] = useState<any>(null);
+  const [quizScore, setQuizScore] = useState(0);
+  const [showHints, setShowHints] = useState(false);
+  const [showInteractiveTheory, setShowInteractiveTheory] = useState(false);
+  const [theoryInteractions, setTheoryInteractions] = useState<any[]>([]);
+
+  // Timer ref for study tracking
+  const studyTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -175,7 +294,7 @@ const LessonsPage = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  // Fetch user progress from API
+  // Fetch user progress and adaptive data
   useEffect(() => {
     const fetchUserProgress = async () => {
       setIsLoading(true);
@@ -228,6 +347,7 @@ const LessonsPage = () => {
     };
 
     fetchUserProgress();
+    loadAdaptiveData();
 
     // Update window width on resize for responsive staff
     const handleResize = () => {
@@ -237,8 +357,65 @@ const LessonsPage = () => {
     window.addEventListener('resize', handleResize);
     return () => {
       window.removeEventListener('resize', handleResize);
+      if (studyTimerRef.current) {
+        clearInterval(studyTimerRef.current);
+      }
     };
   }, []);
+
+  // Load adaptive learning data
+  const loadAdaptiveData = async () => {
+    try {
+      // Get adaptive difficulty recommendation
+      const recommendation = await getAdaptiveDifficultyRecommendation('Lessons', 'theory');
+      setAdaptiveRecommendation(recommendation);
+
+      // Get learning insights
+      const insights = await getLearningInsights(30);
+      setLearningInsights(insights);
+
+      // Get personalized recommendations
+      const personalizedRecs = await getPersonalizedRecommendations('Lessons');
+      setPersonalizedRecommendations(personalizedRecs);
+
+      // Show adaptive hint if recommendation differs from current approach
+      if (recommendation && recommendation.recommendedLevel === 'interactive') {
+        setShowAdaptiveHint(true);
+      }
+    } catch (error) {
+      console.error('Error loading adaptive data:', error);
+    }
+  };
+
+  // Start study session tracking
+  const startStudySession = () => {
+    if (!sessionStarted) {
+      startSession(`chapter_${activeChapter}`, 'medium');
+      setSessionStarted(true);
+      setStudyTime(0);
+
+      // Start timer for study time tracking
+      studyTimerRef.current = setInterval(() => {
+        setStudyTime(prev => prev + 1);
+      }, 1000);
+    }
+  };
+
+  // Stop study session
+  const stopStudySession = async () => {
+    if (studyTimerRef.current) {
+      clearInterval(studyTimerRef.current);
+    }
+
+    if (sessionStarted) {
+      try {
+        await completeSession(comprehensionScore);
+        setSessionStarted(false);
+      } catch (error) {
+        console.error('Error completing study session:', error);
+      }
+    }
+  };
 
   // Render custom elements after chapter content is loaded
   useEffect(() => {
@@ -556,7 +733,23 @@ const LessonsPage = () => {
   };
 
   const handleChapterSelect = (id: number) => {
+    // Stop current session if active
+    if (sessionStarted) {
+      stopStudySession();
+    }
+
     setActiveChapter(id);
+    setQuizMode(false);
+    setCurrentQuiz(null);
+    setQuizScore(0);
+    setShowInteractiveTheory(false);
+    setTheoryInteractions([]);
+    setShowHints(false);
+
+    // Start new study session for the chapter
+    setTimeout(() => {
+      startStudySession();
+    }, 500);
   };
 
   const handleNextChapter = async () => {
@@ -629,6 +822,150 @@ const LessonsPage = () => {
     }
   };
 
+  // Start interactive quiz for current chapter
+  const startQuiz = () => {
+    const quiz = chapterQuizzes.find(q => q.chapterId === activeChapter);
+    if (quiz) {
+      setCurrentQuiz({ ...quiz, currentQuestion: 0, userAnswers: [], showExplanation: false });
+      setQuizMode(true);
+      setQuizScore(0);
+    }
+  };
+
+  // Handle quiz answer selection
+  const handleQuizAnswer = (selectedOption: number) => {
+    if (!currentQuiz) return;
+
+    const question = currentQuiz.questions[currentQuiz.currentQuestion];
+    const isCorrect = selectedOption === question.correct;
+
+    // Update quiz state
+    const updatedAnswers = [...currentQuiz.userAnswers, selectedOption];
+    setCurrentQuiz((prev: any) => ({
+      ...prev!,
+      userAnswers: updatedAnswers,
+      showExplanation: true,
+    }));
+
+    if (isCorrect) {
+      setQuizScore(prev => prev + 1);
+    } else {
+      recordMistake('theory_quiz');
+    }
+
+    // Auto-advance to next question after showing explanation
+    setTimeout(() => {
+      if (currentQuiz.currentQuestion < currentQuiz.questions.length - 1) {
+        setCurrentQuiz((prev: any) => ({
+          ...prev!,
+          currentQuestion: prev!.currentQuestion + 1,
+          showExplanation: false,
+        }));
+      } else {
+        // Quiz completed
+        finishQuiz();
+      }
+    }, 3000);
+  };
+
+  // Finish quiz and calculate results
+  const finishQuiz = async () => {
+    if (!currentQuiz) return;
+
+    const accuracy = Math.round((quizScore / currentQuiz.questions.length) * 100);
+    setComprehensionScore(accuracy);
+
+    try {
+      // Record quiz completion
+      await exerciseAPI.recordExerciseCompletion(
+        'Lessons',
+        `${activeChapter}_quiz`,
+        `${chapters[activeChapter].title} - Interactive Quiz`,
+        accuracy,
+        'Medium'
+      );
+
+      // Complete study session with quiz score
+      await completeSession(accuracy);
+
+      setQuizMode(false);
+
+      // Show completion message
+      setTimeout(() => {
+        alert(
+          `🎉 Quiz completed! You scored ${quizScore}/${currentQuiz.questions.length} (${accuracy}%)`
+        );
+      }, 500);
+    } catch (error) {
+      console.error('Error recording quiz completion:', error);
+    }
+  };
+
+  // Toggle interactive mode for enhanced learning
+  const toggleInteractiveMode = () => {
+    setInteractiveMode(!interactiveMode);
+    if (!interactiveMode) {
+      startStudySession();
+    }
+  };
+
+  // Get adaptive hint for current chapter
+  const getAdaptiveHint = () => {
+    recordHintUsed();
+    setShowHints(true);
+
+    const hints = {
+      0: '💡 Tip: Count the lines on the staff with your fingers! Each line represents a different musical note.',
+      1: '💡 Tip: Clap along with different time signatures - feel the pattern of strong and weak beats!',
+      2: '💡 Tip: Play the C major scale on a piano to hear how the whole and half steps create the familiar major sound.',
+      3: '💡 Tip: Try singing intervals to better understand the distance between notes.',
+      4: '💡 Tip: Practice reading simple melodies by following the contour (shape) first, then the exact notes.',
+      5: '💡 Tip: Play basic chords on an instrument to hear how multiple notes create harmony.',
+      6: '💡 Tip: Listen to your favorite songs and try to identify their form (verse, chorus, bridge).',
+    };
+
+    return hints[activeChapter as keyof typeof hints] || '💡 Keep studying and practicing!';
+  };
+
+  // Handle interactions from the interactive theory component
+  const handleTheoryInteraction = (type: string, data: any) => {
+    const interaction = {
+      type,
+      data,
+      timestamp: new Date().toISOString(),
+      chapterId: activeChapter,
+    };
+
+    setTheoryInteractions(prev => [...prev, interaction]);
+
+    // Update comprehension score based on interactions
+    if (type === 'scale_practice' && data.correct) {
+      setComprehensionScore(prev => Math.min(100, prev + 10));
+    } else if (type === 'chord_practice' && data.correct) {
+      setComprehensionScore(prev => Math.min(100, prev + 15));
+    } else if (type.includes('_played')) {
+      setComprehensionScore(prev => Math.min(100, prev + 2));
+    }
+
+    // Record engagement for progress tracking
+    if (sessionStarted) {
+      // Don't record mistakes for theory interactions as they're learning tools
+      if (type.includes('practice') && !data.correct) {
+        recordMistake('interactive_theory');
+      }
+    }
+
+    // Note: This would be for external interaction tracking if needed
+  };
+
+  // Toggle interactive theory panel
+  const toggleInteractiveTheory = () => {
+    setShowInteractiveTheory(!showInteractiveTheory);
+    if (!showInteractiveTheory) {
+      startStudySession();
+    }
+  };
+
   return (
     <Layout backgroundClass="">
       {/* Floating musical notes background */}
@@ -679,38 +1016,123 @@ const LessonsPage = () => {
           </div>
         ) : (
           <div className="flex flex-col lg:flex-row gap-6">
-            {/* Chapter Navigation */}
+            {/* Enhanced Chapter Navigation */}
             <motion.div className="lg:w-72" variants={itemVariants}>
               <div className="kid-welcome-section">
                 <div className="mb-3" style={{ position: 'relative', zIndex: 2 }}>
-                  <h3 className="activity-title text-lg text-center">📜 Chapters</h3>
+                  <h3 className="activity-title text-lg text-center">📜 Learning Chapters</h3>
+
+                  {/* Adaptive Recommendation Panel */}
+                  {adaptiveRecommendation && showAdaptiveHint && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-3 p-3 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border-2 border-purple-200"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Brain size={16} className="text-purple-600" />
+                        <span className="text-sm font-bold text-purple-800">🤖 AI Tutor</span>
+                      </div>
+                      <p className="text-xs text-purple-700 mb-2">
+                        Try interactive mode for better learning!
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setInteractiveMode(true);
+                            setShowAdaptiveHint(false);
+                          }}
+                          className="text-xs px-2 py-1 bg-purple-500 text-white rounded-full hover:bg-purple-600"
+                        >
+                          Try It!
+                        </button>
+                        <button
+                          onClick={() => setShowAdaptiveHint(false)}
+                          className="text-xs px-2 py-1 bg-gray-300 text-gray-700 rounded-full hover:bg-gray-400"
+                        >
+                          Later
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
 
                 <div className="space-y-1.5" style={{ position: 'relative', zIndex: 2 }}>
-                  {chapters.map(chapter => (
-                    <motion.div
-                      key={chapter.id}
-                      className={`cursor-pointer flex items-center p-2.5 rounded-xl border-2 transition-all ${
-                        activeChapter === chapter.id 
-                          ? 'bg-yellow-100 border-yellow-400 ring-1 ring-yellow-300' 
-                          : 'bg-white bg-opacity-90 border-purple-200 hover:border-purple-300 hover:bg-purple-50'
-                      }`}
-                      onClick={() => handleChapterSelect(chapter.id)}
-                      whileHover={{ x: 3, scale: 1.01 }}
-                      whileTap={{ scale: 0.99 }}
-                    >
-                      <div className="mr-2 flex-shrink-0">
-                        {userProgress[chapter.id] ? (
-                          <div className="text-base">✅</div>
-                        ) : (
-                          <div className="text-base">📖</div>
-                        )}
-                      </div>
-                      <span className="kid-subtitle font-bold text-sm flex-1 leading-tight break-words">
-                        {chapter.id + 1}. {chapter.title}
+                  {chapters.map(chapter => {
+                    const hasQuiz = chapterQuizzes.find(q => q.chapterId === chapter.id);
+                    const isActive = activeChapter === chapter.id;
+
+                    return (
+                      <motion.div
+                        key={chapter.id}
+                        className={`cursor-pointer flex items-center p-2.5 rounded-xl border-2 transition-all ${
+                          isActive
+                            ? 'bg-yellow-100 border-yellow-400 ring-1 ring-yellow-300'
+                            : 'bg-white bg-opacity-90 border-purple-200 hover:border-purple-300 hover:bg-purple-50'
+                        }`}
+                        onClick={() => handleChapterSelect(chapter.id)}
+                        whileHover={{ x: 3, scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                      >
+                        <div className="mr-2 flex-shrink-0">
+                          {userProgress[chapter.id] ? (
+                            <div className="text-base">✅</div>
+                          ) : isActive ? (
+                            <div className="text-base">📚</div>
+                          ) : (
+                            <div className="text-base">📖</div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <span className="kid-subtitle font-bold text-sm leading-tight break-words block">
+                            {chapter.id + 1}. {chapter.title}
+                          </span>
+                          <div className="flex items-center gap-1 mt-1">
+                            {hasQuiz && (
+                              <span className="text-xs bg-pink-200 text-pink-700 px-1 py-0.5 rounded">
+                                🧠 Quiz
+                              </span>
+                            )}
+                            {interactiveMode && isActive && (
+                              <span className="text-xs bg-purple-200 text-purple-700 px-1 py-0.5 rounded">
+                                🤖 AI
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* Learning Progress Summary */}
+                <div className="mt-4 p-3 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl border-2 border-blue-200">
+                  <h4 className="font-bold text-blue-800 text-sm mb-2">📊 Your Progress</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-xs">
+                      <span className="text-blue-700">Completed:</span>
+                      <span className="font-bold text-blue-800">
+                        {Object.values(userProgress).filter(Boolean).length}/{chapters.length}
                       </span>
-                    </motion.div>
-                  ))}
+                    </div>
+                    <div className="w-full bg-blue-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full transition-all"
+                        style={{
+                          width: `${
+                            (Object.values(userProgress).filter(Boolean).length / chapters.length) *
+                            100
+                          }%`,
+                        }}
+                      />
+                    </div>
+                    {theoryScholarUnlocked && (
+                      <div className="flex items-center gap-1 text-xs text-yellow-700">
+                        <Award size={12} />
+                        <span>Theory Scholar!</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -753,46 +1175,317 @@ const LessonsPage = () => {
                   </div>
                 )}
 
+                {/* Enhanced Session Stats */}
+                {sessionStarted && (
+                  <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-r from-blue-100 to-indigo-100 p-3 rounded-2xl border-4 border-blue-200">
+                      <div className="flex items-center gap-2">
+                        <Clock className="text-blue-600" size={20} />
+                        <div>
+                          <div className="font-bold text-blue-800 text-sm">Study Time</div>
+                          <div className="text-lg font-bold text-blue-600">
+                            {Math.floor(studyTime / 60)}:
+                            {(studyTime % 60).toString().padStart(2, '0')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 p-3 rounded-2xl border-4 border-green-200">
+                      <div className="flex items-center gap-2">
+                        <Target className="text-green-600" size={20} />
+                        <div>
+                          <div className="font-bold text-green-800 text-sm">Comprehension</div>
+                          <div className="text-lg font-bold text-green-600">
+                            {comprehensionScore}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-purple-100 to-pink-100 p-3 rounded-2xl border-4 border-purple-200">
+                      <div className="flex items-center gap-2">
+                        <Brain className="text-purple-600" size={20} />
+                        <div>
+                          <div className="font-bold text-purple-800 text-sm">AI Mode</div>
+                          <div className="text-sm font-bold text-purple-600">
+                            {interactiveMode ? 'Active' : 'Standard'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-yellow-100 to-orange-100 p-3 rounded-2xl border-4 border-yellow-200">
+                      <div className="flex items-center gap-2">
+                        <Lightbulb className="text-yellow-600" size={20} />
+                        <div>
+                          <div className="font-bold text-yellow-800 text-sm">Hints Used</div>
+                          <div className="text-lg font-bold text-yellow-600">
+                            {getSessionStats()?.hintsUsed || 0}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Adaptive Learning Insights */}
+                {learningInsights && (
+                  <div className="mt-4 p-4 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl border-4 border-indigo-200">
+                    <h4 className="font-bold text-indigo-800 mb-2">📊 Your Learning Analytics</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <div className="font-bold text-indigo-700">Study Sessions</div>
+                        <div className="text-indigo-600">
+                          {learningInsights.exercisesCompleted || 0}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-indigo-700">Avg Score</div>
+                        <div className="text-indigo-600">
+                          {Math.round(learningInsights.averageScore || 0)}%
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-indigo-700">Best Topic</div>
+                        <div className="text-indigo-600">
+                          {learningInsights.strongestSkills?.[0] || 'Keep studying!'}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="font-bold text-indigo-700">Learning Trend</div>
+                        <div className="text-indigo-600">
+                          {learningInsights.engagementTrend || 'stable'}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Adaptive Hints */}
+                {showHints && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 p-4 bg-gradient-to-r from-yellow-100 to-orange-100 rounded-2xl border-4 border-yellow-300"
+                  >
+                    <div className="flex items-start gap-3">
+                      <Lightbulb className="text-yellow-600 mt-1" size={24} />
+                      <div>
+                        <h4 className="font-bold text-yellow-800">💡 AI Learning Tip</h4>
+                        <p className="text-yellow-700">{getAdaptiveHint()}</p>
+                      </div>
+                      <button
+                        onClick={() => setShowHints(false)}
+                        className="ml-auto text-yellow-600 hover:text-yellow-800"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Interactive Quiz Mode */}
+                {quizMode && currentQuiz && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="mt-6 p-6 bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl border-4 border-pink-300"
+                  >
+                    <h4 className="font-bold text-pink-800 text-xl mb-4">
+                      🧠 Interactive Quiz - Question {currentQuiz.currentQuestion + 1} of{' '}
+                      {currentQuiz.questions.length}
+                    </h4>
+
+                    <div className="mb-4">
+                      <h5 className="font-bold text-lg text-gray-800 mb-4">
+                        {currentQuiz.questions[currentQuiz.currentQuestion].question}
+                      </h5>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {currentQuiz.questions[currentQuiz.currentQuestion].options.map(
+                          (option: string, index: number) => {
+                            const isSelected =
+                              currentQuiz.userAnswers[currentQuiz.currentQuestion] === index;
+                            const isCorrect =
+                              index === currentQuiz.questions[currentQuiz.currentQuestion].correct;
+                            const showResult = currentQuiz.showExplanation;
+
+                            return (
+                              <motion.button
+                                key={index}
+                                className={`p-4 rounded-xl border-2 font-bold text-left transition-all ${
+                                  showResult
+                                    ? isCorrect
+                                      ? 'bg-green-100 border-green-400 text-green-800'
+                                      : isSelected
+                                      ? 'bg-red-100 border-red-400 text-red-800'
+                                      : 'bg-gray-100 border-gray-300 text-gray-600'
+                                    : 'bg-white border-purple-200 hover:border-purple-400 hover:bg-purple-50 text-gray-800'
+                                }`}
+                                onClick={() =>
+                                  !currentQuiz.showExplanation && handleQuizAnswer(index)
+                                }
+                                disabled={currentQuiz.showExplanation}
+                                whileHover={{ scale: currentQuiz.showExplanation ? 1 : 1.02 }}
+                                whileTap={{ scale: currentQuiz.showExplanation ? 1 : 0.98 }}
+                              >
+                                {option}
+                                {showResult && isCorrect && ' ✅'}
+                                {showResult && isSelected && !isCorrect && ' ❌'}
+                              </motion.button>
+                            );
+                          }
+                        )}
+                      </div>
+
+                      {currentQuiz.showExplanation && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mt-4 p-4 bg-blue-100 rounded-lg border-2 border-blue-300"
+                        >
+                          <h6 className="font-bold text-blue-800 mb-2">💡 Explanation:</h6>
+                          <p className="text-blue-700">
+                            {currentQuiz.questions[currentQuiz.currentQuestion].explanation}
+                          </p>
+                        </motion.div>
+                      )}
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-purple-700">
+                        Score: {quizScore}/{currentQuiz.questions.length}
+                      </span>
+                      <div className="w-32 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-purple-500 h-2 rounded-full transition-all"
+                          style={{
+                            width: `${
+                              ((currentQuiz.currentQuestion + 1) / currentQuiz.questions.length) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Interactive Music Theory Component */}
+                <AnimatePresence>
+                  {showInteractiveTheory && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="mt-6"
+                    >
+                      <InteractiveMusicTheory
+                        chapterId={activeChapter}
+                        onInteraction={handleTheoryInteraction}
+                        adaptiveMode={interactiveMode}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Theory Interaction Summary */}
+                {theoryInteractions.length > 0 && !showInteractiveTheory && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-4 p-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl border-4 border-green-200"
+                  >
+                    <h4 className="font-bold text-green-800 mb-2">🎼 Theory Lab Activity</h4>
+                    <div className="text-sm text-green-700">
+                      <p>You've practiced with {theoryInteractions.length} interactions!</p>
+                      <p className="text-xs mt-1">
+                        Last activity:{' '}
+                        {theoryInteractions[theoryInteractions.length - 1]?.type.replace('_', ' ')}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+
                 {/* Navigation Buttons */}
+                <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="flex flex-wrap gap-3">
+                    {/* Interactive Mode Toggle */}
+                    <motion.button
+                      className="kid-button"
+                      style={{
+                        background: interactiveMode
+                          ? 'linear-gradient(45deg, #9B59B6, #FFE66D)'
+                          : 'linear-gradient(45deg, #95E1D3, #4ECDC4)',
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={toggleInteractiveMode}
+                    >
+                      <Bot size={24} className="mr-1" />
+                      {interactiveMode ? 'AI Mode ON' : 'AI Mode'}
+                    </motion.button>
+
+                    {/* Theory Lab Toggle */}
+                    <motion.button
+                      className="kid-button"
+                      style={{
+                        background: showInteractiveTheory
+                          ? 'linear-gradient(45deg, #8E44AD, #3498DB)'
+                          : 'linear-gradient(45deg, #E74C3C, #F39C12)',
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={toggleInteractiveTheory}
+                    >
+                      <Music4 size={24} className="mr-1" />
+                      {showInteractiveTheory ? 'Hide' : 'Theory'} Lab
+                    </motion.button>
+
+                    {/* Quiz Button */}
+                    {chapterQuizzes.find(q => q.chapterId === activeChapter) && !quizMode && (
+                      <motion.button
+                        className="kid-button"
+                        style={{
+                          background: 'linear-gradient(45deg, #FF6B9D, #9B59B6)',
+                        }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={startQuiz}
+                      >
+                        <Brain size={24} className="mr-1" />
+                        Take Quiz!
+                      </motion.button>
+                    )}
+                  </div>
+                </div>
                 <div className="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
                   <div className="bg-white bg-opacity-80 rounded-full px-4 py-2 shadow-lg">
                     <span className="kid-subtitle font-bold">
                       🎆 Adventure Progress: {activeChapter + 1}/{chapters.length} 🎆
                     </span>
                   </div>
-
-                  <div className="flex gap-3">
-                    <motion.button
-                      className="kid-button"
-                      style={{
-                        background: 'linear-gradient(45deg, #95E1D3, #4ECDC4)',
-                      }}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handlePractice}
-                    >
-                      🎤 Practice Magic!
-                    </motion.button>
-
-                    <motion.button
-                      className="kid-button"
-                      style={{
-                        background:
-                          activeChapter === chapters.length - 1
-                            ? 'linear-gradient(45deg, #9CA3AF, #6B7280)'
-                            : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
-                        opacity: activeChapter === chapters.length - 1 ? 0.5 : 1,
-                      }}
-                      whileHover={{ scale: activeChapter === chapters.length - 1 ? 1 : 1.1 }}
-                      whileTap={{ scale: activeChapter === chapters.length - 1 ? 1 : 0.95 }}
-                      onClick={handleNextChapter}
-                      disabled={activeChapter === chapters.length - 1}
-                    >
-                      {activeChapter === chapters.length - 1
-                        ? '🏆 Adventure Complete!'
-                        : '➡️ Next Adventure!'}
-                    </motion.button>
-                  </div>
+                  {/* Next Chapter Button */}
+                  <motion.button
+                    className="kid-button"
+                    style={{
+                      background:
+                        activeChapter === chapters.length - 1
+                          ? 'linear-gradient(45deg, #9CA3AF, #6B7280)'
+                          : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+                      opacity: activeChapter === chapters.length - 1 ? 0.5 : 1,
+                    }}
+                    whileHover={{ scale: activeChapter === chapters.length - 1 ? 1 : 1.05 }}
+                    whileTap={{ scale: activeChapter === chapters.length - 1 ? 1 : 0.95 }}
+                    onClick={handleNextChapter}
+                    disabled={activeChapter === chapters.length - 1}
+                  >
+                    {activeChapter === chapters.length - 1
+                      ? '🏆 Adventure Complete!'
+                      : '🚀 Next Adventure!'}
+                  </motion.button>
                 </div>
               </div>
             </motion.div>

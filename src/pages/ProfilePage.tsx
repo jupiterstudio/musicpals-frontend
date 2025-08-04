@@ -233,7 +233,7 @@ const ProfilePage = () => {
           >
             🌟 Your Magical Profile! 🎭
           </h1>
-          <div className="musical-icon">👤</div>
+          <div className="musical-icon">🎨</div>
           <p className="kid-subtitle text-xl" style={{ position: 'relative', zIndex: 2 }}>
             Check out your amazing musical journey and all the cool stuff you've learned!
           </p>

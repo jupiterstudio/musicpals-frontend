@@ -76,3 +76,47 @@ export const achievementAPI = {
     });
   },
 };
+
+// AI Music Generation API functions
+export const musicGenerationAPI = {
+  generateMelody: (options: {
+    genre?: string;
+    mood?: string;
+    tempo?: number;
+    complexity?: 'beginner' | 'intermediate' | 'advanced';
+    userProgress?: any;
+  }) => {
+    return apiClient.post('/ai-music/generate', options);
+  },
+
+  saveMelody: (melodyData: {
+    name: string;
+    notes: any[];
+    metadata: {
+      genre?: string;
+      mood?: string;
+      tempo?: number;
+      duration?: number;
+    };
+  }) => {
+    return apiClient.post('/ai-music/save', melodyData);
+  },
+
+  getUserMelodies: () => {
+    return apiClient.get('/ai-music/user-melodies');
+  },
+
+  analyzeMelody: (notes: any[]) => {
+    return apiClient.post('/ai-music/analyze', { notes });
+  },
+
+  getPersonalizedSuggestions: () => {
+    return apiClient.get('/ai-music/suggestions');
+  },
+
+  exportMelody: (melodyId: string, format: 'midi' | 'musicxml' | 'wav') => {
+    return apiClient.get(`/ai-music/export/${melodyId}/${format}`, {
+      responseType: 'blob',
+    });
+  },
+};
