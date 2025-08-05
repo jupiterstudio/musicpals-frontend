@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Home, Ear, Mic, Music, BookOpen, User, LogOut } from 'lucide-react';
 import Banner from '../assets/banner.svg';
 import Logo from '../assets/small-logo.png';
+import authService from '../services/auth';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Navigation = () => {
   }, [location]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    authService.logout();
     navigate('/login');
   };
 
