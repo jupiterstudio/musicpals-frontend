@@ -42,32 +42,41 @@ const Header = () => {
   };
 
   return (
-    <header style={{
-      background: 'rgba(255, 255, 255, 0.95)',
-      backdropFilter: 'blur(10px)',
-      padding: '1rem 0',
-      boxShadow: '0 4px 20px rgba(255, 107, 157, 0.3)',
-      position: 'sticky',
-      top: 0,
-      zIndex: 100,
-      borderBottom: '4px solid #FF6B9D'
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        margin: '0 auto',
-        width: '100%',
-        padding: '0 2rem'
-      }}>
-        {/* Logo */}
-        <Link to="/" style={{
+    <header
+      style={{
+        background: 'rgba(255, 255, 255, 0.95)',
+        backdropFilter: 'blur(10px)',
+        padding: '1rem 0',
+        boxShadow: '0 4px 20px rgba(255, 107, 157, 0.3)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+        borderBottom: '4px solid #FF6B9D',
+      }}
+    >
+      <div
+        style={{
           display: 'flex',
+          justifyContent: 'space-between',
           alignItems: 'center',
-          gap: '1rem',
-          textDecoration: 'none'
-        }}>
-          <span className="bouncing-logo" style={{ fontSize: '3rem' }}>🎵</span>
+          margin: '0 auto',
+          width: '100%',
+          padding: '0 2rem',
+        }}
+      >
+        {/* Logo */}
+        <Link
+          to="/"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            textDecoration: 'none',
+          }}
+        >
+          <span className="bouncing-logo" style={{ fontSize: '3rem' }}>
+            🎵
+          </span>
           <span className="logo-text">Music Pals</span>
         </Link>
 
@@ -84,24 +93,24 @@ const Header = () => {
                 fontFamily: 'Nunito, sans-serif',
                 fontWeight: 600,
                 textDecoration: 'none',
-                background: isActive(item.path) 
+                background: isActive(item.path)
                   ? 'linear-gradient(45deg, #FF6B9D, #FFE66D)'
                   : 'transparent',
                 color: isActive(item.path) ? 'white' : '#666',
-                boxShadow: isActive(item.path) 
-                  ? '0 4px 15px rgba(255, 107, 157, 0.4)' 
-                  : 'none'
+                boxShadow: isActive(item.path) ? '0 4px 15px rgba(255, 107, 157, 0.4)' : 'none',
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 if (!isActive(item.path)) {
-                  e.target.style.background = 'rgba(255, 107, 157, 0.1)';
-                  e.target.style.color = '#FF6B9D';
+                  const target = e.target as HTMLElement;
+                  target.style.background = 'rgba(255, 107, 157, 0.1)';
+                  target.style.color = '#FF6B9D';
                 }
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 if (!isActive(item.path)) {
-                  e.target.style.background = 'transparent';
-                  e.target.style.color = '#666';
+                  const target = e.target as HTMLElement;
+                  target.style.background = 'transparent';
+                  target.style.color = '#666';
                 }
               }}
             >
@@ -118,7 +127,7 @@ const Header = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '1rem',
-              background: isActive('/profile') 
+              background: isActive('/profile')
                 ? 'linear-gradient(45deg, #9B59B6, #3498DB)'
                 : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
               padding: '0.5rem 1.5rem',
@@ -131,17 +140,19 @@ const Header = () => {
               fontFamily: 'Nunito, sans-serif',
               textDecoration: 'none',
               transition: 'transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease',
-              cursor: 'pointer'
+              cursor: 'pointer',
             }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'scale(1.05)';
-              e.target.style.boxShadow = isActive('/profile')
+            onMouseEnter={e => {
+              const target = e.target as HTMLElement;
+              target.style.transform = 'scale(1.05)';
+              target.style.boxShadow = isActive('/profile')
                 ? '0 6px 20px rgba(155, 89, 182, 0.6)'
                 : '0 6px 20px rgba(255, 107, 157, 0.6)';
             }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'scale(1)';
-              e.target.style.boxShadow = isActive('/profile')
+            onMouseLeave={e => {
+              const target = e.target as HTMLElement;
+              target.style.transform = 'scale(1)';
+              target.style.boxShadow = isActive('/profile')
                 ? '0 4px 15px rgba(155, 89, 182, 0.4)'
                 : '0 4px 15px rgba(255, 107, 157, 0.4)';
             }}
@@ -163,13 +174,15 @@ const Header = () => {
               fontWeight: 600,
               cursor: 'pointer',
               boxShadow: '0 4px 15px rgba(255, 107, 157, 0.4)',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
             }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'scale(1.05)';
+            onMouseEnter={e => {
+              const target = e.target as HTMLElement;
+              target.style.transform = 'scale(1.05)';
             }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'scale(1)';
+            onMouseLeave={e => {
+              const target = e.target as HTMLElement;
+              target.style.transform = 'scale(1)';
             }}
           >
             Logout
@@ -185,7 +198,7 @@ const Header = () => {
               color: '#FF6B9D',
               fontSize: '1.5rem',
               cursor: 'pointer',
-              padding: '0.5rem'
+              padding: '0.5rem',
             }}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -203,14 +216,16 @@ const Header = () => {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.95)',
-              backdropFilter: 'blur(10px)',
-              borderRadius: '20px',
-              boxShadow: '0 8px 30px rgba(255, 107, 157, 0.3)',
-              overflow: 'hidden',
-              border: '4px solid #FF6B9D'
-            }}>
+            <div
+              style={{
+                background: 'rgba(255, 255, 255, 0.95)',
+                backdropFilter: 'blur(10px)',
+                borderRadius: '20px',
+                boxShadow: '0 8px 30px rgba(255, 107, 157, 0.3)',
+                overflow: 'hidden',
+                border: '4px solid #FF6B9D',
+              }}
+            >
               <nav style={{ display: 'flex', flexDirection: 'column', padding: '0.5rem' }}>
                 {navItems.map(item => (
                   <Link
@@ -224,11 +239,11 @@ const Header = () => {
                       textDecoration: 'none',
                       borderRadius: '15px',
                       margin: '0.25rem 0',
-                      background: isActive(item.path) 
+                      background: isActive(item.path)
                         ? 'linear-gradient(45deg, #FF6B9D, #FFE66D)'
                         : 'transparent',
                       color: isActive(item.path) ? 'white' : '#666',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
                     }}
                   >
                     {item.name}

@@ -1,5 +1,5 @@
 // src/pages/LessonsPage.tsx - Enhanced with Adaptive Learning
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
@@ -946,7 +946,7 @@ const LessonsPage = () => {
   };
 
   // Handle interactions from the interactive theory component
-  const handleTheoryInteraction = (type: string, data: any) => {
+  const handleTheoryInteraction = useCallback((type: string, data: any) => {
     const interaction = {
       type,
       data,
@@ -974,7 +974,7 @@ const LessonsPage = () => {
     }
 
     // Note: This would be for external interaction tracking if needed
-  };
+  }, [activeChapter, sessionStarted, recordMistake]);
 
   // Toggle interactive theory panel
   const toggleInteractiveTheory = () => {

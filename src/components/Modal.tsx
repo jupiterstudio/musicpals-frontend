@@ -1,7 +1,7 @@
 // src/components/Modal.tsx
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, Sparkles, RotateCcw } from 'lucide-react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -110,12 +110,14 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({
         <h3 className="text-2xl font-bold kid-title mb-4">{title}</h3>
         <p className="text-lg kid-subtitle mb-6 leading-relaxed">{message}</p>
         <motion.button
-          className="kid-button"
+          className="kid-button flex items-center justify-center gap-2"
           onClick={onClose}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          ✨ Awesome! ✨
+          <Sparkles size={20} />
+          Awesome!
+          <Sparkles size={20} />
         </motion.button>
       </div>
     </Modal>
@@ -143,7 +145,7 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({
         <h3 className="text-2xl font-bold kid-title mb-4 text-red-500">{title}</h3>
         <p className="text-lg kid-subtitle mb-6 leading-relaxed">{message}</p>
         <motion.button
-          className="kid-button"
+          className="kid-button flex items-center justify-center gap-2"
           style={{
             background: 'linear-gradient(45deg, #ef4444, #f87171)'
           }}
@@ -151,7 +153,8 @@ export const ErrorModal: React.FC<ErrorModalProps> = ({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          🔄 Try Again
+          <RotateCcw size={20} />
+          Try Again
         </motion.button>
       </div>
     </Modal>
