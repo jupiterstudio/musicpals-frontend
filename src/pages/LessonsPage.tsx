@@ -14,6 +14,8 @@ import {
   CheckCircle,
   Music4,
   Bot,
+  Trophy,
+  Rocket,
 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { progressAPI, exerciseAPI, achievementAPI } from '../services/api';
@@ -387,10 +389,26 @@ const LessonsPage = () => {
     }
   };
 
+  // Map chapter to appropriate exercise type for backend
+  const mapChapterToExerciseType = (chapterIndex: number): string => {
+    const chapterMapping: { [key: number]: string } = {
+      0: 'sight_reading', // Introduction to Music Notation
+      1: 'rhythm_clapping', // Understanding Rhythm
+      2: 'sight_reading', // Major and Minor Scales  
+      3: 'interval_recognition', // Intervals and Harmony
+      4: 'melody_composition', // Reading and Playing Melodies
+      5: 'chord_identification', // Introduction to Chords
+      6: 'sight_reading' // Musical Form and Structure
+    };
+    return chapterMapping[chapterIndex] || 'sight_reading';
+  };
+
   // Start study session tracking
   const startStudySession = () => {
     if (!sessionStarted) {
-      startSession(`chapter_${activeChapter}`, 'medium');
+      const exerciseType = mapChapterToExerciseType(activeChapter);
+      const difficultyLevel = 'Medium'; // Use proper capitalization
+      startSession(exerciseType, difficultyLevel);
       setSessionStarted(true);
       setStudyTime(0);
 
@@ -1090,12 +1108,14 @@ const LessonsPage = () => {
                           <div className="flex items-center gap-1 mt-1">
                             {hasQuiz && (
                               <span className="text-xs bg-pink-200 text-pink-700 px-1 py-0.5 rounded">
-                                🧠 Quiz
+                                <Brain size={12} className="inline mr-1" />
+                                Quiz 
                               </span>
                             )}
                             {interactiveMode && isActive && (
                               <span className="text-xs bg-purple-200 text-purple-700 px-1 py-0.5 rounded">
-                                🤖 AI
+                                <Bot size={12} className="inline mr-1" />
+                                AI
                               </span>
                             )}
                           </div>
@@ -1293,7 +1313,8 @@ const LessonsPage = () => {
                     className="mt-6 p-6 bg-gradient-to-r from-pink-100 to-purple-100 rounded-2xl border-4 border-pink-300"
                   >
                     <h4 className="font-bold text-pink-800 text-xl mb-4">
-                      🧠 Interactive Quiz - Question {currentQuiz.currentQuestion + 1} of{' '}
+                      <Brain size={12} className="inline mr-1" />
+                      Interactive Quiz - Question {currentQuiz.currentQuestion + 1} of{' '}
                       {currentQuiz.questions.length}
                     </h4>
 
@@ -1482,9 +1503,17 @@ const LessonsPage = () => {
                     onClick={handleNextChapter}
                     disabled={activeChapter === chapters.length - 1}
                   >
-                    {activeChapter === chapters.length - 1
-                      ? '🏆 Adventure Complete!'
-                      : '🚀 Next Adventure!'}
+                    {activeChapter === chapters.length - 1 ? (
+                      <>
+                        <Trophy size={20} className="mr-2" />
+                        Adventure Complete!
+                      </>
+                    ) : (
+                      <>
+                        <Rocket size={20} className="mr-2" />
+                        Next Adventure!
+                      </>
+                    )}
                   </motion.button>
                 </div>
               </div>

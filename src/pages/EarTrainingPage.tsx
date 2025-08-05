@@ -164,9 +164,26 @@ const EarTrainingPage = () => {
     loadAdaptiveData();
   }, []);
 
+  // Map frontend exercise types to backend enum values
+  const mapExerciseType = (exerciseType: string): string => {
+    const mapping: { [key: string]: string } = {
+      'Intervals': 'interval_recognition',
+      'Chords': 'chord_identification', 
+      'Notes': 'pitch_matching',
+      'Scales': 'sight_reading'
+    };
+    return mapping[exerciseType] || 'interval_recognition';
+  };
+
+  // Ensure difficulty level has correct capitalization
+  const mapDifficultyLevel = (difficulty: string): string => {
+    return difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+  };
+
   const startNewSession = () => {
-    const exerciseType = `${selectedExerciseType}_${selectedDifficulty}`;
-    startSession(exerciseType, selectedDifficulty);
+    const exerciseType = mapExerciseType(selectedExerciseType);
+    const difficultyLevel = mapDifficultyLevel(selectedDifficulty);
+    startSession(exerciseType, difficultyLevel);
     setSessionStarted(true);
     setStreakCount(0);
   };

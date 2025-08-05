@@ -118,24 +118,32 @@ const Header = () => {
               display: 'flex',
               alignItems: 'center',
               gap: '1rem',
-              background: 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
+              background: isActive('/profile') 
+                ? 'linear-gradient(45deg, #9B59B6, #3498DB)'
+                : 'linear-gradient(45deg, #FF6B9D, #FFE66D)',
               padding: '0.5rem 1.5rem',
               borderRadius: '50px',
               color: 'white',
               fontWeight: 700,
-              boxShadow: '0 4px 15px rgba(255, 107, 157, 0.4)',
+              boxShadow: isActive('/profile')
+                ? '0 4px 15px rgba(155, 89, 182, 0.4)'
+                : '0 4px 15px rgba(255, 107, 157, 0.4)',
               fontFamily: 'Nunito, sans-serif',
               textDecoration: 'none',
-              transition: 'all 0.3s ease',
+              transition: 'transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease',
               cursor: 'pointer'
             }}
             onMouseEnter={(e) => {
               e.target.style.transform = 'scale(1.05)';
-              e.target.style.boxShadow = '0 6px 20px rgba(255, 107, 157, 0.6)';
+              e.target.style.boxShadow = isActive('/profile')
+                ? '0 6px 20px rgba(155, 89, 182, 0.6)'
+                : '0 6px 20px rgba(255, 107, 157, 0.6)';
             }}
             onMouseLeave={(e) => {
               e.target.style.transform = 'scale(1)';
-              e.target.style.boxShadow = '0 4px 15px rgba(255, 107, 157, 0.4)';
+              e.target.style.boxShadow = isActive('/profile')
+                ? '0 4px 15px rgba(155, 89, 182, 0.4)'
+                : '0 4px 15px rgba(255, 107, 157, 0.4)';
             }}
           >
             <span>🌟</span>

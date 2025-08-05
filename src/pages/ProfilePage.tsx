@@ -1,7 +1,7 @@
 // src/pages/ProfilePage.tsx - Updated with API integration
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { User, Award, Music, Mic, BookOpen, Ear, ChevronUp } from 'lucide-react';
+import { User, Award, Music, Mic, BookOpen, Ear, ChevronUp, Trophy, ArrowRight, Target } from 'lucide-react';
 import Layout from '../components/Layout';
 import { userAPI, progressAPI, achievementAPI } from '../services/api';
 
@@ -355,7 +355,9 @@ const ProfilePage = () => {
                   style={{ background: 'linear-gradient(45deg, #FFE66D, #FF6B9D)' }}
                   onClick={handleViewAllAchievements}
                 >
-                  🎊 View All Achievements ({userAchievements.length}) 🎊
+                  <Trophy size={20} className="mr-2" />
+                  View All Achievements ({userAchievements.length})
+                  <Trophy size={20} className="ml-2" />
                 </button>
               </div>
             )}
@@ -467,7 +469,8 @@ const ProfilePage = () => {
                               alert(`Navigating to ${module.moduleType} page`);
                             }}
                           >
-                            🚀 Go to{' '}
+                            <ArrowRight size={20} className="mr-2" />
+                            Go to{' '}
                             {module.moduleType === 'EarTraining'
                               ? 'Ear Training'
                               : module.moduleType === 'SightSinging'
@@ -475,7 +478,8 @@ const ProfilePage = () => {
                               : module.moduleType === 'MusicGeneration'
                               ? 'Music Generation'
                               : module.moduleType}{' '}
-                            Adventure! 🎯
+                            Adventure!
+                            <Target size={20} className="ml-2" />
                           </button>
                         </div>
                       </motion.div>

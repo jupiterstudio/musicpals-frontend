@@ -311,10 +311,29 @@ const SightSingingPage = () => {
     }
   };
 
+  // Map frontend exercise types to backend enum values
+  const mapExerciseType = (exerciseType: string): string => {
+    if (exerciseType === 'All') return 'sight_reading';
+    
+    const mapping: { [key: string]: string } = {
+      'Scales': 'sight_reading',
+      'Intervals': 'interval_recognition', 
+      'Melody': 'melody_composition',
+      'Notes': 'pitch_matching'
+    };
+    return mapping[exerciseType] || 'sight_reading';
+  };
+
+  // Ensure difficulty level has correct capitalization
+  const mapDifficultyLevel = (difficulty: string): string => {
+    return difficulty.charAt(0).toUpperCase() + difficulty.slice(1).toLowerCase();
+  };
+
   // Start new session tracking
   const startNewSession = () => {
-    const exerciseType = `${selectedExerciseType}_${selectedDifficulty}`;
-    startSession(exerciseType, selectedDifficulty);
+    const exerciseType = mapExerciseType(selectedExerciseType);
+    const difficultyLevel = mapDifficultyLevel(selectedDifficulty);
+    startSession(exerciseType, difficultyLevel);
     setSessionStarted(true);
     setStreakCount(0);
     setPitchHistory([]);

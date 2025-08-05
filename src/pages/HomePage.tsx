@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Music, Ear, Mic, BookOpen, ChevronRight } from 'lucide-react';
+import { Music, Ear, Mic, BookOpen, ChevronRight, Search, Star, Palette, Rocket, MicVocal } from 'lucide-react';
 import Layout from '../components/Layout';
 import { progressAPI } from '../services/api';
 
@@ -120,18 +120,18 @@ const HomePage = () => {
           maxWidth: '1000px',
           margin: '0 auto',
           position: 'relative',
-          zIndex: 10
+          zIndex: 10,
         }}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         {/* Welcome Section */}
-        <motion.section
-          className="kid-welcome-section"
-          variants={itemVariants}
-        >
-          <h1 className="kid-title text-4xl md:text-5xl mb-4" style={{ position: 'relative', zIndex: 2 }}>
+        <motion.section className="kid-welcome-section" variants={itemVariants}>
+          <h1
+            className="kid-title text-4xl md:text-5xl mb-4"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
             Welcome to Your Musical Adventure!
           </h1>
           <div className="musical-icon">🎪</div>
@@ -153,14 +153,16 @@ const HomePage = () => {
             <span className="activity-icon">👂🎵</span>
             <h3 className="activity-title">Ear Training Fun!</h3>
             <p className="activity-description">
-              Can you guess the mystery sounds? Train your super hearing powers and become a music detective!
+              Can you guess the mystery sounds? Train your super hearing powers and become a music
+              detective!
             </p>
             <motion.button
               className="kid-button"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              Start Listening! 🕵️
+              <Search size={20} className="mr-2" />
+              Start Listening!
             </motion.button>
           </motion.div>
 
@@ -175,14 +177,16 @@ const HomePage = () => {
             <span className="activity-icon">🎤✨</span>
             <h3 className="activity-title">Singing Star!</h3>
             <p className="activity-description">
-              Sing along with the notes and watch them light up! Become the next big singing sensation!
+              Sing along with the notes and watch them light up! Become the next big singing
+              sensation!
             </p>
             <motion.button
               className="kid-button"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              Let's Sing! 🌟
+              <MicVocal size={20} className="mr-2" />
+              Let's Sing!
             </motion.button>
           </motion.div>
 
@@ -204,7 +208,8 @@ const HomePage = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              Create Music! 🎨
+              <Palette size={20} className="mr-2" />
+              Create Music!
             </motion.button>
           </motion.div>
 
@@ -226,17 +231,17 @@ const HomePage = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
-              Start Adventure! 🚀
+              <Rocket size={20} className="mr-2" />
+              Start Adventure!
             </motion.button>
           </motion.div>
         </section>
 
         {/* Recent Progress Section */}
-        <motion.section
-          className="kid-welcome-section"
-          variants={itemVariants}
-        >
-          <h2 className="kid-title text-3xl mb-6" style={{ position: 'relative', zIndex: 2 }}>Your Musical Journey! 🌈</h2>
+        <motion.section className="kid-welcome-section" variants={itemVariants}>
+          <h2 className="kid-title text-3xl mb-6" style={{ position: 'relative', zIndex: 2 }}>
+            Your Musical Journey! 🌈
+          </h2>
 
           {isLoading ? (
             <div className="flex justify-center py-8">
@@ -245,7 +250,10 @@ const HomePage = () => {
           ) : error ? (
             <div className="bg-red-50 p-4 rounded-md text-red-600 text-sm mb-4">{error}</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6" style={{ position: 'relative', zIndex: 2 }}>
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              style={{ position: 'relative', zIndex: 2 }}
+            >
               <div className="flex flex-col items-center gap-3">
                 <span className="kid-subtitle text-lg font-bold">🎧 Ear Training</span>
                 <div className="kid-progress-bar w-full">
@@ -256,7 +264,9 @@ const HomePage = () => {
                     transition={{ duration: 1, delay: 0.2 }}
                   />
                 </div>
-                <span className="kid-subtitle text-lg font-bold text-pink-500">{userProgress.earTraining}% Complete! 🎉</span>
+                <span className="kid-subtitle text-lg font-bold text-pink-500">
+                  {userProgress.earTraining}% Complete! 🎉
+                </span>
               </div>
 
               <div className="flex flex-col items-center gap-3">
@@ -269,7 +279,9 @@ const HomePage = () => {
                     transition={{ duration: 1, delay: 0.3 }}
                   />
                 </div>
-                <span className="kid-subtitle text-lg font-bold text-pink-500">{userProgress.sightSinging}% Complete! 🌟</span>
+                <span className="kid-subtitle text-lg font-bold text-pink-500">
+                  {userProgress.sightSinging}% Complete! 🌟
+                </span>
               </div>
 
               <div className="flex flex-col items-center gap-3">
@@ -282,7 +294,9 @@ const HomePage = () => {
                     transition={{ duration: 1, delay: 0.4 }}
                   />
                 </div>
-                <span className="kid-subtitle text-lg font-bold text-pink-500">{userProgress.musicGeneration}% Complete! 🚀</span>
+                <span className="kid-subtitle text-lg font-bold text-pink-500">
+                  {userProgress.musicGeneration}% Complete! 🚀
+                </span>
               </div>
 
               <div className="flex flex-col items-center gap-3">
@@ -295,13 +309,18 @@ const HomePage = () => {
                     transition={{ duration: 1, delay: 0.5 }}
                   />
                 </div>
-                <span className="kid-subtitle text-lg font-bold text-pink-500">{userProgress.lessons}% Complete! 💪</span>
+                <span className="kid-subtitle text-lg font-bold text-pink-500">
+                  {userProgress.lessons}% Complete! 💪
+                </span>
               </div>
             </div>
           )}
 
           {/* Achievement badges */}
-          <div className="flex justify-center gap-4 mt-8 flex-wrap" style={{ position: 'relative', zIndex: 2 }}>
+          <div
+            className="flex justify-center gap-4 mt-8 flex-wrap"
+            style={{ position: 'relative', zIndex: 2 }}
+          >
             <div className="badge badge-gold">🏆</div>
             <div className="badge badge-silver">🥈</div>
             <div className="badge badge-bronze">🥉</div>

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { User, Lock, AtSign, UserPlus, LogIn } from 'lucide-react';
+import { User, Lock, AtSign, UserPlus, LogIn, Rocket, Star } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import Logo from '../assets/small-logo-no-bg.png';
 // Make sure to export the interface from auth.ts or create it here
@@ -254,11 +254,19 @@ const LoginPage = () => {
               {loading ? (
                 <div className="w-6 h-6 border-t-2 border-r-2 border-white rounded-full animate-spin mr-3"></div>
               ) : isLogin ? (
-                <span className="text-2xl mr-3">🎵</span>
+                <LogIn size={24} className="mr-3" />
               ) : (
-                <span className="text-2xl mr-3">🎪</span>
+                <UserPlus size={24} className="mr-3" />
               )}
-              {isLogin ? "Let's Play Music! 🚀" : 'Join the Fun! 🌟'}
+              {isLogin ? (
+                <>
+                  Let's Play Music! <Rocket size={20} className="ml-2" />
+                </>
+              ) : (
+                <>
+                  Join the Fun! <Star size={20} className="ml-2" />
+                </>
+              )}
             </motion.button>
           </form>
 
@@ -271,8 +279,18 @@ const LoginPage = () => {
               whileTap={{ scale: 0.95 }}
             >
               {isLogin
-                ? '🎪 New here? Join our Musical Adventure!'
-                : "🎵 Already a Music Pal? Let's Play!"}
+                ? (
+                    <>
+                      <UserPlus size={20} className="inline mr-2" />
+                      New here? Join our Musical Adventure!
+                    </>
+                  )
+                : (
+                    <>
+                      <LogIn size={20} className="inline mr-2" />
+                      Already a Music Pal? Let's Play!
+                    </>
+                  )}
             </motion.button>
           </div>
         </motion.div>
