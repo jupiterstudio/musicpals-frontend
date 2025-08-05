@@ -34,3 +34,35 @@ body {
     height: 40px;
   }
 }
+
+/* Custom Scrollbar Styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #e5d1f7;
+  border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #9333ea;
+  border-radius: 10px;
+  border: 1px solid #e5d1f7;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #7c3aed;
+}
+
+.scrollbar-thumb-purple-400::-webkit-scrollbar-thumb {
+  background: #a855f7;
+}
+
+.scrollbar-track-purple-100::-webkit-scrollbar-track {
+  background: #f3e8ff;
+}

@@ -678,7 +678,7 @@ const InteractiveMusicTheory: React.FC<InteractiveMusicTheoryProps> = React.memo
           setUserScore(prev => prev + 15);
           setModalMessage('Perfect chord! Well done! You got all the notes right!');
           setShowSuccessModal(true);
-          playChord(correctNotes);
+          // Note: Audio playback temporarily disabled to prevent parent re-renders
         } else {
           const correctNotesText = correctNotes.map(n => NOTES[n]).join(', ');
           const selectedNotesText = selectedNotes.map(n => NOTES[n]).join(', ');
@@ -686,9 +686,9 @@ const InteractiveMusicTheory: React.FC<InteractiveMusicTheoryProps> = React.memo
 
 Correct ${practiceChord.type} chord: ${correctNotesText}
 
-Listen to the correct chord playing now!`);
+Try again!`);
           setShowErrorModal(true);
-          playChord(correctNotes);
+          // Note: Audio playback temporarily disabled to prevent parent re-renders
         }
 
         onInteraction?.('chord_practice', {
@@ -701,10 +701,11 @@ Listen to the correct chord playing now!`);
       };
 
       return (
-        <div>
-          <h4 className="text-lg font-bold text-purple-800 mb-4 text-center">
-            🎼 Interactive Chord Builder
-          </h4>
+        <>
+          <div>
+            <h4 className="text-lg font-bold text-purple-800 mb-4 text-center">
+              🎼 Interactive Chord Builder
+            </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Chord Player */}
@@ -775,12 +776,75 @@ Listen to the correct chord playing now!`);
                     </strong>{' '}
                     chord
                   </p>
-                  <p className="text-sm text-orange-600 mb-4">
+                  <p className="text-sm text-orange-600 mb-2">
                     Click the piano keys to select the chord notes
                   </p>
+                  <p className="text-xs text-orange-500 mb-4">
+                    💡 Tip: A {practiceChord!.type} chord has 3 notes. Click notes to toggle them on/off.
+                  </p>
+
+                  {/* Mini Piano for Chord Practice */}
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="relative">
+                      {/* White Keys */}
+                      <div className="flex gap-1 justify-center">
+                        {[0, 2, 4, 5, 7, 9, 11].map(noteIndex => (
+                          <button
+                            key={noteIndex}
+                            className={`w-8 h-16 bg-white border border-gray-400 rounded-b text-xs font-bold flex items-end justify-center pb-1 ${
+                              selectedNotes.includes(noteIndex)
+                                ? 'bg-orange-200 border-orange-500'
+                                : 'hover:bg-gray-100'
+                            }`}
+                            onClick={() => {
+                              playNote(noteIndex);
+                              setSelectedNotes(prev =>
+                                prev.includes(noteIndex)
+                                  ? prev.filter(n => n !== noteIndex)
+                                  : [...prev, noteIndex]
+                              );
+                            }}
+                          >
+                            {NOTES[noteIndex]}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Black Keys */}
+                      <div
+                        className="absolute top-0 flex justify-center"
+                        style={{ left: '0.25rem' }}
+                      >
+                        {[1, 3, -1, 6, 8, 10, -1].map((noteIndex, index) =>
+                          noteIndex === -1 ? (
+                            <div key={`spacer-${index}`} className="w-8" />
+                          ) : (
+                            <button
+                              key={noteIndex}
+                              className={`w-6 h-10 bg-gray-800 text-white text-xs font-bold rounded-b flex items-end justify-center pb-1 ${
+                                selectedNotes.includes(noteIndex)
+                                  ? 'bg-orange-600'
+                                  : 'hover:bg-gray-600'
+                              }`}
+                              onClick={() => {
+                                playNote(noteIndex);
+                                setSelectedNotes(prev =>
+                                  prev.includes(noteIndex)
+                                    ? prev.filter(n => n !== noteIndex)
+                                    : [...prev, noteIndex]
+                                );
+                              }}
+                            >
+                              {NOTES[noteIndex]}
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
                   <div className="mb-4">
-                    <p className="text-sm font-bold">Selected notes:</p>
+                    <p className="text-sm font-bold">Selected notes ({selectedNotes.length}/3):</p>
                     <p className="text-orange-700">
                       {selectedNotes.length > 0
                         ? selectedNotes.map(n => NOTES[n]).join(', ')
@@ -809,7 +873,25 @@ Listen to the correct chord playing now!`);
               )}
             </div>
           </div>
-        </div>
+          </div>
+          
+          {/* Success Modal */}
+          <SuccessModal
+            isOpen={showSuccessModal}
+            onClose={() => setShowSuccessModal(false)}
+            title="Perfect Chord!"
+            message={modalMessage}
+            icon="🎵"
+          />
+          
+          {/* Error Modal */}
+          <ErrorModal
+            isOpen={showErrorModal}
+            onClose={() => setShowErrorModal(false)}
+            title="Not Quite Right"
+            message={modalMessage}
+          />
+        </>
       );
     });
 
@@ -1864,6 +1946,460 @@ Listen to the correct chord playing now!`);
       );
     });
 
+    // Interactive Form Component  
+    const InteractiveForm = React.memo(() => {
+      const [selectedForm, setSelectedForm] = useState<string>('ABA');
+      const [currentSection, setCurrentSection] = useState<string>('A');
+      const [formSequence, setFormSequence] = useState<string[]>(['A']);
+      const [isPlayingForm, setIsPlayingForm] = useState(false);
+
+      const musicalForms = [
+        {
+          name: 'ABA (Ternary)',
+          pattern: ['A', 'B', 'A'],
+          description: 'Statement - Contrast - Return',
+          example: 'Many folk songs and classical pieces',
+          color: 'from-blue-400 to-blue-600'
+        },
+        {
+          name: 'ABAB (Binary)',
+          pattern: ['A', 'B', 'A', 'B'],
+          description: 'Alternating sections',
+          example: 'Verse-Chorus songs',
+          color: 'from-green-400 to-green-600'
+        },
+        {
+          name: 'ABACA (Rondo)',
+          pattern: ['A', 'B', 'A', 'C', 'A'],
+          description: 'Main theme returns repeatedly',
+          example: 'Classical rondo movements',
+          color: 'from-purple-400 to-purple-600'
+        },
+        {
+          name: 'AABA (Song Form)',
+          pattern: ['A', 'A', 'B', 'A'],
+          description: 'Verse-Verse-Bridge-Verse',
+          example: 'Popular songs and standards',
+          color: 'from-orange-400 to-orange-600'
+        }
+      ];
+
+      const sectionMelodies = {
+        A: [4, 5, 4, 2], // E, F, E, D
+        B: [7, 6, 5, 4], // G, F#, F, E
+        C: [9, 7, 5, 4]  // A, G, F, E
+      };
+
+      const addSection = (section: string) => {
+        setFormSequence(prev => [...prev, section]);
+        onInteraction?.('form_section_added', { section, sequence: [...formSequence, section] });
+      };
+
+      const playFormSection = (section: string) => {
+        const melody = sectionMelodies[section as keyof typeof sectionMelodies];
+        melody.forEach((noteIndex, i) => {
+          setTimeout(() => {
+            playNote(noteIndex, 0.5);
+          }, i * 300);
+        });
+      };
+
+      const playCompleteForm = async () => {
+        setIsPlayingForm(true);
+        let totalTime = 0;
+
+        for (let i = 0; i < formSequence.length; i++) {
+          const section = formSequence[i];
+          const melody = sectionMelodies[section as keyof typeof sectionMelodies];
+          
+          setTimeout(() => {
+            melody.forEach((noteIndex, j) => {
+              setTimeout(() => {
+                playNote(noteIndex, 0.4);
+              }, j * 250);
+            });
+          }, totalTime);
+          
+          totalTime += melody.length * 250 + 500; // Add pause between sections
+        }
+
+        setTimeout(() => {
+          setIsPlayingForm(false);
+        }, totalTime);
+
+        onInteraction?.('complete_form_played', { sequence: formSequence, totalTime });
+      };
+
+      const loadPresetForm = (form: typeof musicalForms[0]) => {
+        setSelectedForm(form.name);
+        setFormSequence([...form.pattern]);
+      };
+
+      return (
+        <div>
+          <h4 className="text-lg font-bold text-purple-800 mb-4 text-center">📋 Interactive Musical Form</h4>
+          
+          <div className="bg-gradient-to-r from-indigo-100 to-cyan-100 p-6 rounded-xl">
+            {/* Current Form Display */}
+            <div className="mb-6 p-4 bg-white rounded-xl border-2 border-indigo-200">
+              <h5 className="font-bold text-indigo-800 mb-3">🎵 Your Musical Form</h5>
+              {formSequence.length > 0 ? (
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {formSequence.map((section, index) => (
+                    <motion.div
+                      key={index}
+                      className="bg-gradient-to-r from-indigo-400 to-purple-400 text-white px-4 py-2 rounded-lg font-bold text-lg shadow-lg"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      {section}
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-indigo-600 text-center italic">Build your musical form by adding sections!</p>
+              )}
+            </div>
+
+            {/* Preset Forms */}
+            <div className="mb-6">
+              <h5 className="font-bold text-indigo-800 mb-3">📚 Common Musical Forms</h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {musicalForms.map((form, index) => (
+                  <motion.button
+                    key={index}
+                    className={`p-4 rounded-xl border-4 transition-all text-left ${
+                      selectedForm === form.name
+                        ? 'border-indigo-500 bg-indigo-100'
+                        : 'border-gray-300 bg-white hover:border-indigo-300'
+                    }`}
+                    onClick={() => loadPresetForm(form)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <h6 className="font-bold text-indigo-700 mb-2">{form.name}</h6>
+                    <div className="flex gap-1 mb-2">
+                      {form.pattern.map((section, i) => (
+                        <div
+                          key={i}
+                          className={`w-8 h-8 bg-gradient-to-r ${form.color} text-white rounded-lg flex items-center justify-center font-bold text-sm`}
+                        >
+                          {section}
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-indigo-600 text-sm mb-1">{form.description}</p>
+                    <p className="text-indigo-500 text-xs">{form.example}</p>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Section Builder */}
+            <div className="mb-6 p-4 bg-white rounded-xl border-2 border-cyan-200">
+              <h5 className="font-bold text-cyan-800 mb-3">🎼 Build Your Own Form</h5>
+              <div className="flex justify-center gap-3 mb-4">
+                {['A', 'B', 'C'].map(section => (
+                  <motion.button
+                    key={section}
+                    className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-bold flex items-center gap-2"
+                    onClick={() => addSection(section)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Music size={16} />
+                    Add Section {section}
+                  </motion.button>
+                ))}
+              </div>
+              
+              <div className="flex justify-center gap-3">
+                <motion.button
+                  className="px-4 py-2 bg-orange-500 text-white rounded-lg font-bold"
+                  onClick={() => setFormSequence([])}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  Clear Form
+                </motion.button>
+                
+                <motion.button
+                  className={`px-4 py-2 rounded-lg font-bold flex items-center gap-2 ${
+                    isPlayingForm || formSequence.length === 0
+                      ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                      : 'bg-green-500 text-white hover:bg-green-600'
+                  }`}
+                  onClick={playCompleteForm}
+                  disabled={isPlayingForm || formSequence.length === 0}
+                  whileHover={!isPlayingForm && formSequence.length > 0 ? { scale: 1.05 } : {}}
+                  whileTap={!isPlayingForm && formSequence.length > 0 ? { scale: 0.95 } : {}}
+                >
+                  <Play size={16} />
+                  {isPlayingForm ? 'Playing...' : 'Play Form'}
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Section Preview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {['A', 'B', 'C'].map(section => (
+                <div key={section} className="bg-white p-4 rounded-xl border-2 border-gray-200">
+                  <h6 className="font-bold text-gray-800 mb-2">Section {section}</h6>
+                  <p className="text-gray-600 text-sm mb-3">
+                    {section === 'A' && 'Main theme - Memorable melody'}
+                    {section === 'B' && 'Contrasting section - Different melody'}  
+                    {section === 'C' && 'Another contrast - Third melody'}
+                  </p>
+                  <button
+                    className="px-3 py-1 bg-gray-500 text-white rounded-lg text-sm hover:bg-gray-600"
+                    onClick={() => playFormSection(section)}
+                  >
+                    Preview {section}
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {/* Educational Info */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white p-4 rounded-xl border-2 border-blue-200">
+                <h6 className="font-bold text-blue-800 mb-2 text-sm flex items-center gap-2">
+                  📋 What is Musical Form?
+                </h6>
+                <p className="text-blue-700 text-xs leading-relaxed">
+                  Musical form is the structure of a piece - how different sections are organized and repeated to create a complete musical work.
+                </p>
+              </div>
+              
+              <div className="bg-white p-4 rounded-xl border-2 border-green-200">
+                <h6 className="font-bold text-green-800 mb-2 text-sm flex items-center gap-2">
+                  🎵 Why Forms Matter
+                </h6>
+                <p className="text-green-700 text-xs leading-relaxed">
+                  Forms help organize music so listeners can follow along and remember melodies. Repetition and contrast keep music interesting!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    });
+
+    // Interactive Analysis Component
+    const InteractiveAnalysis = React.memo(() => {
+      const [selectedPiece, setSelectedPiece] = useState<string>('twinkle');
+      const [analysisMode, setAnalysisMode] = useState<'form' | 'rhythm' | 'melody'>('form');
+      const [showAnalysis, setShowAnalysis] = useState(false);
+
+      const musicPieces = {
+        'twinkle': {
+          name: 'Twinkle, Twinkle, Little Star',  
+          form: 'AABA',
+          rhythm: '4/4 time with quarter notes',
+          melody: 'Uses scale degrees 1-2-3-5-6 in C major',
+          sections: [
+            { section: 'A', description: 'Twinkle, twinkle, little star' },
+            { section: 'A', description: 'How I wonder what you are' },
+            { section: 'B', description: 'Up above the world so high' },
+            { section: 'A', description: 'Like a diamond in the sky' }
+          ],
+          notes: [0, 0, 7, 7, 9, 9, 7] // C, C, G, G, A, A, G
+        },
+        'mary': {
+          name: 'Mary Had a Little Lamb',
+          form: 'AABA',
+          rhythm: '4/4 time with quarter and half notes',
+          melody: 'Simple descending and ascending patterns',
+          sections: [
+            { section: 'A', description: 'Mary had a little lamb' },
+            { section: 'A', description: 'Little lamb, little lamb' },  
+            { section: 'B', description: 'Mary had a little lamb' },
+            { section: 'A', description: 'Its fleece was white as snow' }
+          ],
+          notes: [4, 2, 0, 2, 4, 4, 4] // E, D, C, D, E, E, E
+        },
+        'happy': {
+          name: 'Happy Birthday',
+          form: 'AABA',
+          rhythm: '3/4 time (waltz feel)',
+          melody: 'Wide interval jumps and stepwise motion',
+          sections: [
+            { section: 'A', description: 'Happy birthday to you' },
+            { section: 'A', description: 'Happy birthday to you' },
+            { section: 'B', description: 'Happy birthday dear [name]' },
+            { section: 'A', description: 'Happy birthday to you' }
+          ],
+          notes: [0, 0, 2, 0, 5, 4] // C, C, D, C, F, E
+        }
+      };
+
+      const currentPiece = musicPieces[selectedPiece as keyof typeof musicPieces];
+
+      const playMelody = async () => {
+        const notes = currentPiece.notes;
+        for (let i = 0; i < notes.length; i++) {
+          setTimeout(() => {
+            playNote(notes[i], 0.6);
+          }, i * 400);
+        }
+        onInteraction?.('analysis_melody_played', { piece: selectedPiece, notes });
+      };
+
+      const analyzeSection = (section: string) => {
+        setShowAnalysis(true);
+        onInteraction?.('section_analyzed', { piece: selectedPiece, section, mode: analysisMode });
+      };
+
+      return (
+        <div>
+          <h4 className="text-lg font-bold text-purple-800 mb-4 text-center">🔍 Interactive Musical Analysis</h4>
+          
+          <div className="bg-gradient-to-r from-emerald-100 to-teal-100 p-6 rounded-xl">
+            {/* Piece Selection */}
+            <div className="mb-6 p-4 bg-white rounded-xl border-2 border-emerald-200">
+              <h5 className="font-bold text-emerald-800 mb-3">🎵 Choose a Piece to Analyze</h5>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {Object.entries(musicPieces).map(([key, piece]) => (
+                  <motion.button
+                    key={key}
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      selectedPiece === key
+                        ? 'border-emerald-500 bg-emerald-100'
+                        : 'border-gray-300 bg-white hover:border-emerald-300'
+                    }`}
+                    onClick={() => setSelectedPiece(key)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <h6 className="font-bold text-emerald-700 text-sm">{piece.name}</h6>
+                    <p className="text-emerald-600 text-xs">{piece.form} form</p>
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Analysis Mode Selection */}
+            <div className="mb-6 p-4 bg-white rounded-xl border-2 border-teal-200">
+              <h5 className="font-bold text-teal-800 mb-3">🔍 Analysis Focus</h5>
+              <div className="flex gap-3 justify-center">
+                {[
+                  { key: 'form', label: 'Form Structure', icon: '📋' },
+                  { key: 'rhythm', label: 'Rhythm Patterns', icon: '🥁' },
+                  { key: 'melody', label: 'Melodic Movement', icon: '🎼' }
+                ].map(mode => (
+                  <motion.button
+                    key={mode.key}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all flex items-center gap-2 ${
+                      analysisMode === mode.key
+                        ? 'border-teal-500 bg-teal-100'
+                        : 'border-gray-300 bg-white hover:border-teal-300'
+                    }`}
+                    onClick={() => setAnalysisMode(mode.key as 'form' | 'rhythm' | 'melody')}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {mode.icon} {mode.label}
+                  </motion.button>
+                ))}
+              </div>
+            </div>
+
+            {/* Current Piece Analysis */}
+            <div className="mb-6 p-4 bg-white rounded-xl border-2 border-blue-200">
+              <div className="flex justify-between items-center mb-4">
+                <h5 className="font-bold text-blue-800">📊 Analysis: {currentPiece.name}</h5>
+                <button
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                  onClick={playMelody}
+                >
+                  <Play size={16} />
+                  Play Melody
+                </button>
+              </div>
+
+              {analysisMode === 'form' && (
+                <div>
+                  <h6 className="font-bold text-blue-700 mb-2">Form Structure: {currentPiece.form}</h6>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-blue-600 text-sm mb-3">Section breakdown:</p>
+                      {currentPiece.sections.map((section, index) => (
+                        <div key={index} className="flex items-center gap-3 mb-2">
+                          <div className="w-8 h-8 bg-blue-500 text-white rounded-lg flex items-center justify-center font-bold text-sm">
+                            {section.section}
+                          </div>
+                          <span className="text-blue-700 text-sm">{section.description}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-center">
+                      <div className="flex gap-1 justify-center mb-3">
+                        {currentPiece.form.split('').map((letter, i) => (
+                          <div
+                            key={i}
+                            className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-lg flex items-center justify-center font-bold"
+                          >
+                            {letter}
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-blue-600 text-xs">Visual form pattern</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {analysisMode === 'rhythm' && (
+                <div>
+                  <h6 className="font-bold text-blue-700 mb-2">Rhythm Analysis</h6>
+                  <p className="text-blue-600 mb-3">{currentPiece.rhythm}</p>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-blue-700 text-sm">
+                      Listen to how the rhythm creates a steady pulse that makes the melody easy to follow and remember.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {analysisMode === 'melody' && (
+                <div>
+                  <h6 className="font-bold text-blue-700 mb-2">Melodic Analysis</h6>
+                  <p className="text-blue-600 mb-3">{currentPiece.melody}</p>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <p className="text-blue-700 text-sm">
+                      The melody uses simple intervals and repetition to create a memorable tune that's easy to sing.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Educational Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white p-4 rounded-xl border-2 border-purple-200">
+                <h6 className="font-bold text-purple-800 mb-2 text-sm flex items-center gap-2">
+                  🔍 Musical Analysis
+                </h6>
+                <p className="text-purple-700 text-xs leading-relaxed">
+                  Analyzing music helps us understand how composers create memorable and effective pieces by examining structure, rhythm, and melody.
+                </p>
+              </div>
+              
+              <div className="bg-white p-4 rounded-xl border-2 border-pink-200">
+                <h6 className="font-bold text-pink-800 mb-2 text-sm flex items-center gap-2">
+                  📚 Learning Benefits
+                </h6>
+                <p className="text-pink-700 text-xs leading-relaxed">
+                  Understanding musical patterns helps you recognize similar structures in other pieces and even compose your own music!
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    });
+
     // Render different components based on active selection with conditional rendering to preserve state
 
     const availableComponents = getComponentOptions;
@@ -1974,6 +2510,16 @@ Listen to the correct chord playing now!`);
           {availableComponents.includes('melody') && (
             <div style={{ display: activeComponent === 'melody' ? 'block' : 'none' }}>
               <InteractiveMelody />
+            </div>
+          )}
+          {availableComponents.includes('form') && (
+            <div style={{ display: activeComponent === 'form' ? 'block' : 'none' }}>
+              <InteractiveForm />
+            </div>
+          )}
+          {availableComponents.includes('analysis') && (
+            <div style={{ display: activeComponent === 'analysis' ? 'block' : 'none' }}>
+              <InteractiveAnalysis />
             </div>
           )}
         </div>

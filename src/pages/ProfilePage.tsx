@@ -46,6 +46,7 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedModules, setExpandedModules] = useState<string[]>([]);
+  const [showAllAchievements, setShowAllAchievements] = useState(false);
 
   // Animation variants
   const containerVariants = {
@@ -140,13 +141,7 @@ const ProfilePage = () => {
 
   // Handle viewing all achievements
   const handleViewAllAchievements = () => {
-    // In a real app, this might navigate to a dedicated achievements page
-    // For demo purposes, expand/collapse all modules
-    if (expandedModules.length === moduleProgress.length) {
-      setExpandedModules([]);
-    } else {
-      setExpandedModules(moduleProgress.map(module => module.moduleType));
-    }
+    setShowAllAchievements(!showAllAchievements);
   };
 
   // Calculate overall completion percentage
@@ -324,9 +319,22 @@ const ProfilePage = () => {
           <motion.div className="kid-welcome-section lg:col-span-2" variants={itemVariants}>
             <h3 className="activity-title text-2xl mb-6 text-center" style={{ position: 'relative', zIndex: 2 }}>🏆 Your Super Achievements! 🎉</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" style={{ position: 'relative', zIndex: 2 }}>
-              {userAchievements.slice(0, 4).map((achievement, index) => (
-                <div key={index} className="flex items-start p-5 bg-gradient-to-r from-yellow-100 via-pink-100 to-purple-100 rounded-2xl border-2 border-yellow-300 shadow-lg transform hover:scale-105 transition-transform">
+            <div 
+              className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${
+                showAllAchievements && userAchievements.length > 4 
+                  ? 'max-h-96 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-purple-100' 
+                  : ''
+              }`}
+              style={{ position: 'relative', zIndex: 2 }}
+            >
+              {(showAllAchievements ? userAchievements : userAchievements.slice(0, 4)).map((achievement, index) => (
+                <motion.div 
+                  key={index} 
+                  className="flex items-start p-5 bg-gradient-to-r from-yellow-100 via-pink-100 to-purple-100 rounded-2xl border-2 border-yellow-300 shadow-lg transform hover:scale-105 transition-transform"
+                  initial={showAllAchievements && index >= 4 ? { opacity: 0, y: 20 } : {}}
+                  animate={showAllAchievements && index >= 4 ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.3, delay: (index - 4) * 0.1 }}
+                >
                   <div className="h-14 w-14 flex items-center justify-center bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full mr-4 shadow-lg text-white flex-shrink-0">
                     {getAchievementIcon(achievement.icon)}
                   </div>
@@ -337,7 +345,7 @@ const ProfilePage = () => {
                       🗓️ Earned on {formatDate(achievement.unlockedDate)}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
 
@@ -350,15 +358,17 @@ const ProfilePage = () => {
 
             {userAchievements.length > 4 && (
               <div className="mt-6 text-center" style={{ position: 'relative', zIndex: 2 }}>
-                <button
+                <motion.button
                   className="kid-button text-base"
                   style={{ background: 'linear-gradient(45deg, #FFE66D, #FF6B9D)' }}
                   onClick={handleViewAllAchievements}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <Trophy size={20} className="mr-2" />
-                  View All Achievements ({userAchievements.length})
+                  {showAllAchievements ? 'Show Less' : `View All Achievements (${userAchievements.length})`}
                   <Trophy size={20} className="ml-2" />
-                </button>
+                </motion.button>
               </div>
             )}
           </motion.div>
