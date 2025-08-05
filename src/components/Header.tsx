@@ -145,16 +145,10 @@ const Header = () => {
             onMouseEnter={e => {
               const target = e.target as HTMLElement;
               target.style.transform = 'scale(1.05)';
-              target.style.boxShadow = isActive('/profile')
-                ? '0 6px 20px rgba(155, 89, 182, 0.6)'
-                : '0 6px 20px rgba(255, 107, 157, 0.6)';
             }}
             onMouseLeave={e => {
               const target = e.target as HTMLElement;
               target.style.transform = 'scale(1)';
-              target.style.boxShadow = isActive('/profile')
-                ? '0 4px 15px rgba(155, 89, 182, 0.4)'
-                : '0 4px 15px rgba(255, 107, 157, 0.4)';
             }}
           >
             <span>🌟</span>
